@@ -1,0 +1,72 @@
+// Схема бази даних CRM рекрутингу.
+// Enum-подібні поля (role, gender, recruitmentType, channel, status) зберігаються рядками,
+// а їх допустимі значення й українські лейбли живуть у src/lib/domain.ts.
+// Це тримає схему сумісною і з SQLite (локально), і з Postgres (продакшн).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("RECRUITER") // ADMIN | RECRUITER
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  responsibleFor Candidate[]    @relation("Responsible")
+  statusChanges  StatusChange[]
+}
+
+model Unit {
+  id         String      @id @default(cuid())
+  name       String      @unique
+  createdAt  DateTime    @default(now())
+  candidates Candidate[]
+}
+
+model Candidate {
+  id       String  @id @default(cuid())
+  fullName String
+  age      Int?
+  gender   String? // MALE | FEMALE
+  position String? // посада (вільний текст з автопідказками)
+
+  recruitmentType String // MOBILIZATION | CONTRACT | CONTRACT_18_24
+  channel         String // RECRUITING_CENTER | DIRECT
+  status          String @default("NEW")
+  note            String @default("")
+
+  unitId String?
+  unit   Unit?   @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  responsibleUserId String?
+  responsible       User?   @relation("Responsible", fields: [responsibleUserId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  statusChanges StatusChange[]
+}
+
+model StatusChange {
+  id          String    @id @default(cuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  fromStatus  String?
+  toStatus    String
+  changedById String
+  changedBy   User      @relation(fields: [changedById], references: [id])
+  changedAt   DateTime  @default(now())
+
+  @@index([candidateId])
+  @@index([toStatus, changedAt])
+}

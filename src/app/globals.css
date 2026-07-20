@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  Дизайн-система «Операційний пульт».
+  Хром спокійний графітовий; насиченість кольору віддана статусам (див. domain.ts).
+  Теми перемикаються за системним налаштуванням (prefers-color-scheme).
+*/
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --canvas: #f4f4f1;
+  --surface: #ffffff;
+  --surface-2: #fafaf8;
+  --border: #e4e4df;
+  --border-strong: #d3d3cc;
+  --ink: #1a1e26;
+  --ink-soft: #5c6270;
+  --ink-faint: #8a909c;
+
+  /* Ліва рейка — темний якір інтерфейсу в будь-якій темі. */
+  --rail: #1b2029;
+  --rail-2: #232935;
+  --rail-ink: #c3c9d4;
+  --rail-ink-soft: #7d8494;
+  --rail-active: #eef0f3;
+  --rail-active-ink: #1b2029;
+
+  /* Основна дія — інверсний високий контраст. */
+  --brand: #1b2029;
+  --brand-ink: #f7f7f5;
+  --brand-hover: #2c3340;
+
+  --ring: #3b4757;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --canvas: #0c0f15;
+    --surface: #141922;
+    --surface-2: #1a2029;
+    --border: #262d39;
+    --border-strong: #333c4a;
+    --ink: #e7e9ee;
+    --ink-soft: #9aa1af;
+    --ink-faint: #6b7280;
+
+    --rail: #090c11;
+    --rail-2: #141922;
+    --rail-ink: #c3c9d4;
+    --rail-ink-soft: #6b7280;
+    --rail-active: #232935;
+    --rail-active-ink: #f2f4f7;
+
+    --brand: #e7e9ee;
+    --brand-ink: #141922;
+    --brand-hover: #cfd3db;
+
+    --ring: #5b6472;
   }
 }
 
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+
+  --color-rail: var(--rail);
+  --color-rail-2: var(--rail-2);
+  --color-rail-ink: var(--rail-ink);
+  --color-rail-ink-soft: var(--rail-ink-soft);
+  --color-rail-active: var(--rail-active);
+  --color-rail-active-ink: var(--rail-active-ink);
+
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-hover: var(--brand-hover);
+
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+* {
+  border-color: var(--border);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Утиліта для «консольного» лейбла (eyebrow / метадані). */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Табличні цифри для чисел статистики. */
+.tnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
