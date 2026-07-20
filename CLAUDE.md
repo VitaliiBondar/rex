@@ -18,8 +18,10 @@
 - `npx prisma migrate dev` — міграції
 
 ## Демо-акаунти (після seed)
-- Адмін: `admin@rex.local` / `admin123`
-- Рекрутер: `recruiter@rex.local` / `recruiter123`
+- Адмін: `admin@rex.local` / `admin123` (дефолт для локальної розробки)
+- Рекрутер: `recruiter@rex.local` / `recruiter123` (дефолт для локальної розробки)
+- Паролі перевизначаються через `SEED_ADMIN_PASSWORD` / `SEED_RECRUITER_PASSWORD` у `.env`
+  (див. `.env.example`) — обов'язково перед seed на будь-якій недовірчій/продакшн базі.
 
 ## Ключові місця
 - Доменні enum-и + лейбли/кольори: `src/lib/domain.ts` (єдине джерело правди)
@@ -27,6 +29,12 @@
 - Server actions: `src/lib/actions/*`
 - Запити до БД: `src/lib/queries.ts`
 - Захист маршрутів і ролей: `src/middleware.ts` + `callbacks.authorized` в `auth.config.ts`
+
+## Статус проєкту
+Це лише початок (перший робочий MVP, 2026-07-20) — доробляти протягом кількох тижнів.
+Деплой (Vercel + Postgres) навмисно відкладено до повної готовності проєкту (дипломна
+робота); поки що працюємо лише локально. Репозиторій: `https://github.com/VitaliiBondar/rex`
+(публічний, гілка `main`). SQLite/`dev.db` і `.env` у git не потрапляють (`.gitignore`).
 
 ## Примітки
 - enum-поля БД зберігаються рядками (сумісність SQLite/Postgres); валідні значення — у `domain.ts`.

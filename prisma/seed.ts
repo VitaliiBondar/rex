@@ -58,6 +58,18 @@ async function createCandidate(
 }
 
 async function main() {
+  // Паролі беремо з env, щоб не тримати їх відкритим текстом у публічному репозиторії.
+  // Дефолти лишаються лише для зручності локальної розробки.
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "admin123";
+  const recruiterPassword = process.env.SEED_RECRUITER_PASSWORD ?? "recruiter123";
+  if (!process.env.SEED_ADMIN_PASSWORD || !process.env.SEED_RECRUITER_PASSWORD) {
+    console.warn(
+      "УВАГА: SEED_ADMIN_PASSWORD/SEED_RECRUITER_PASSWORD не задані — використано дефолтні " +
+        "паролі для розробки. Для будь-якої недовірчої/продакшн БД обов'язково задайте власні " +
+        "значення в .env перед запуском seed.",
+    );
+  }
+
   // Чиста повторно-застосовна seed-база.
   await prisma.statusChange.deleteMany();
   await prisma.candidate.deleteMany();
@@ -68,7 +80,7 @@ async function main() {
     data: {
       name: "Адміністратор",
       email: "admin@rex.local",
-      passwordHash: await bcrypt.hash("admin123", 10),
+      passwordHash: await bcrypt.hash(adminPassword, 10),
       role: "ADMIN",
     },
   });
@@ -77,7 +89,7 @@ async function main() {
     data: {
       name: "Олена Рекрутер",
       email: "recruiter@rex.local",
-      passwordHash: await bcrypt.hash("recruiter123", 10),
+      passwordHash: await bcrypt.hash(recruiterPassword, 10),
       role: "RECRUITER",
     },
   });
@@ -223,8 +235,8 @@ async function main() {
   );
 
   console.log("Seed завершено. Кандидатів: 7, користувачів: 2, підрозділів: 3.");
-  console.log("Вхід адміна: admin@rex.local / admin123");
-  console.log("Вхід рекрутера: recruiter@rex.local / recruiter123");
+  console.log(`Вхід адміна: admin@rex.local / ${adminPassword}`);
+  console.log(`Вхід рекрутера: recruiter@rex.local / ${recruiterPassword}`);
 }
 
 main()
