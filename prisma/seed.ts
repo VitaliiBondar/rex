@@ -20,7 +20,7 @@ async function createCandidate(
     channel: string;
     note?: string;
     unitId?: string;
-    responsibleUserId: string;
+    changedById: string;
     createdAt: Date;
   },
   changes: SeedChange[],
@@ -36,7 +36,6 @@ async function createCandidate(
       channel: data.channel,
       note: data.note ?? "",
       unitId: data.unitId,
-      responsibleUserId: data.responsibleUserId,
       status,
       createdAt: data.createdAt,
     },
@@ -49,7 +48,7 @@ async function createCandidate(
         candidateId: candidate.id,
         fromStatus: prev,
         toStatus: ch.to,
-        changedById: data.responsibleUserId,
+        changedById: data.changedById,
         changedAt: ch.at,
       },
     });
@@ -111,11 +110,11 @@ async function main() {
       channel: "DIRECT",
       note: "Мотивований, є досвід. ВЛК проходив у червні, зарахований у липні.",
       unitId: unit1.id,
-      responsibleUserId: recruiter.id,
+      changedById: recruiter.id,
       createdAt: d(6, 15),
     },
     [
-      { to: "NEW", at: d(6, 15) },
+      { to: "UNIT_SEARCH", at: d(6, 15) },
       { to: "MEDICAL_COMMISSION", at: d(6, 25) },
       { to: "ENLISTED", at: d(7, 8) },
     ],
@@ -131,11 +130,11 @@ async function main() {
       recruitmentType: "MOBILIZATION",
       channel: "RECRUITING_CENTER",
       unitId: unit2.id,
-      responsibleUserId: admin.id,
+      changedById: admin.id,
       createdAt: d(6, 2),
     },
     [
-      { to: "NEW", at: d(6, 2) },
+      { to: "UNIT_SEARCH", at: d(6, 2) },
       { to: "COLLECTING_DOCS", at: d(6, 8) },
       { to: "ENLISTED", at: d(6, 20) },
     ],
@@ -151,11 +150,11 @@ async function main() {
       recruitmentType: "MOBILIZATION",
       channel: "RECRUITING_CENTER",
       note: "Не пройшов за станом здоров'я.",
-      responsibleUserId: recruiter.id,
+      changedById: recruiter.id,
       createdAt: d(7, 3),
     },
     [
-      { to: "NEW", at: d(7, 3) },
+      { to: "UNIT_SEARCH", at: d(7, 3) },
       { to: "MEDICAL_COMMISSION", at: d(7, 6) },
       { to: "REJECTED_BY_US", at: d(7, 10) },
     ],
@@ -171,11 +170,11 @@ async function main() {
       recruitmentType: "CONTRACT_18_24",
       channel: "DIRECT",
       note: "Передумав, обрав інший підрозділ.",
-      responsibleUserId: recruiter.id,
+      changedById: recruiter.id,
       createdAt: d(6, 10),
     },
     [
-      { to: "NEW", at: d(6, 10) },
+      { to: "UNIT_SEARCH", at: d(6, 10) },
       { to: "SELF_WITHDREW", at: d(6, 18) },
     ],
   );
@@ -190,12 +189,11 @@ async function main() {
       recruitmentType: "CONTRACT",
       channel: "DIRECT",
       unitId: unitSup.id,
-      responsibleUserId: admin.id,
+      changedById: admin.id,
       createdAt: d(7, 5),
     },
     [
-      { to: "NEW", at: d(7, 5) },
-      { to: "IN_PROGRESS", at: d(7, 7) },
+      { to: "UNIT_SEARCH", at: d(7, 5) },
       { to: "COLLECTING_DOCS", at: d(7, 12) },
     ],
   );
@@ -209,10 +207,10 @@ async function main() {
       position: "Стрілець",
       recruitmentType: "CONTRACT_18_24",
       channel: "DIRECT",
-      responsibleUserId: recruiter.id,
+      changedById: recruiter.id,
       createdAt: d(7, 18),
     },
-    [{ to: "NEW", at: d(7, 18) }],
+    [{ to: "UNIT_SEARCH", at: d(7, 18) }],
   );
 
   // Перенесений активний: доданий у червні, ВЛК триває в липні.
@@ -225,16 +223,37 @@ async function main() {
       recruitmentType: "MOBILIZATION",
       channel: "RECRUITING_CENTER",
       unitId: unit1.id,
-      responsibleUserId: admin.id,
+      changedById: admin.id,
       createdAt: d(6, 28),
     },
     [
-      { to: "NEW", at: d(6, 28) },
+      { to: "UNIT_SEARCH", at: d(6, 28) },
       { to: "MEDICAL_COMMISSION", at: d(7, 2) },
     ],
   );
 
-  console.log("Seed завершено. Кандидатів: 7, користувачів: 2, підрозділів: 3.");
+  // Дійшов до етапу "Оформлення" (CONTRACT_SIGNING) — для повноти конвеєра.
+  await createCandidate(
+    {
+      fullName: "Роман Литвин",
+      age: 29,
+      gender: "MALE",
+      position: "Кулеметник",
+      recruitmentType: "CONTRACT",
+      channel: "DIRECT",
+      unitId: unit2.id,
+      changedById: recruiter.id,
+      createdAt: d(7, 1),
+    },
+    [
+      { to: "UNIT_SEARCH", at: d(7, 1) },
+      { to: "COLLECTING_DOCS", at: d(7, 4) },
+      { to: "MEDICAL_COMMISSION", at: d(7, 10) },
+      { to: "CONTRACT_SIGNING", at: d(7, 16) },
+    ],
+  );
+
+  console.log("Seed завершено. Кандидатів: 8, користувачів: 2, підрозділів: 3.");
   console.log(`Вхід адміна: admin@rex.local / ${adminPassword}`);
   console.log(`Вхід рекрутера: recruiter@rex.local / ${recruiterPassword}`);
 }

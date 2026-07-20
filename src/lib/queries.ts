@@ -1,30 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import type { StatCandidate } from "@/lib/stats";
 
-export type CandidateListFilters = {
-  q?: string;
-  status?: string;
-  recruitmentType?: string;
-  channel?: string;
-  responsibleUserId?: string;
-};
-
-// Список кандидатів для таблиці/карток із фільтрами.
-export async function getCandidates(filters: CandidateListFilters = {}) {
+// Список кандидатів для канбану (live-статус, без часових фільтрів).
+export async function getCandidates() {
   return prisma.candidate.findMany({
-    where: {
-      status: filters.status || undefined,
-      recruitmentType: filters.recruitmentType || undefined,
-      channel: filters.channel || undefined,
-      responsibleUserId: filters.responsibleUserId || undefined,
-      fullName: filters.q
-        ? { contains: filters.q }
-        : undefined,
-    },
-    include: {
-      unit: true,
-      responsible: { select: { id: true, name: true } },
-    },
+    include: { unit: true },
     orderBy: { updatedAt: "desc" },
   });
 }
@@ -34,7 +14,6 @@ export async function getCandidateById(id: string) {
     where: { id },
     include: {
       unit: true,
-      responsible: { select: { id: true, name: true } },
       statusChanges: {
         include: { changedBy: { select: { name: true } } },
         orderBy: { changedAt: "desc" },
@@ -74,12 +53,19 @@ export async function getPositions(): Promise<string[]> {
     .sort((a, b) => a.localeCompare(b, "uk"));
 }
 
+export type CandidateForStats = StatCandidate & {
+  fullName: string;
+  position: string | null;
+  unit: { name: string } | null;
+};
+
 // Усі кандидати з історією статусів у формі для модуля stats.
-export async function getCandidatesForStats(): Promise<
-  (StatCandidate & { fullName: string })[]
-> {
+// Використовується і Дашбордом, і списком кандидатів (помісячний перегляд) —
+// фільтрація й агрегація відбуваються в пам'яті через lib/stats.
+export async function getCandidatesForStats(): Promise<CandidateForStats[]> {
   const rows = await prisma.candidate.findMany({
     include: {
+      unit: { select: { name: true } },
       statusChanges: {
         select: { toStatus: true, changedAt: true },
         orderBy: { changedAt: "asc" },
@@ -89,11 +75,12 @@ export async function getCandidatesForStats(): Promise<
   return rows.map((c) => ({
     id: c.id,
     fullName: c.fullName,
+    position: c.position,
+    unit: c.unit,
     createdAt: c.createdAt,
     status: c.status,
     recruitmentType: c.recruitmentType,
     channel: c.channel,
-    responsibleUserId: c.responsibleUserId,
     statusChanges: c.statusChanges.map((s) => ({
       toStatus: s.toStatus,
       changedAt: s.changedAt,

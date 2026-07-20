@@ -12,13 +12,11 @@ export function CandidateActions({
   candidateId,
   defaultValues,
   units,
-  users,
   positions,
 }: {
   candidateId: string;
   defaultValues: Partial<CandidateFormValues>;
   units: { id: string; name: string }[];
-  users: { id: string; name: string }[];
   positions: string[];
 }) {
   const router = useRouter();
@@ -57,7 +55,6 @@ export function CandidateActions({
           candidateId={candidateId}
           defaultValues={defaultValues}
           units={units}
-          users={users}
           positions={positions}
           onDone={() => setOpen(false)}
         />

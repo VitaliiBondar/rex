@@ -20,6 +20,19 @@ export function currentMonth(now: Date = new Date()): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
+// Наступний/попередній місяць у форматі "YYYY-MM" — для навігації по місяцях.
+export function nextMonth(month: string): string {
+  const [y, m] = month.split("-").map(Number);
+  const d = new Date(y, m, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+export function previousMonth(month: string): string {
+  const [y, m] = month.split("-").map(Number);
+  const d = new Date(y, m - 2, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
 // Останні N місяців (від старих до нових), включно з поточним.
 export function lastMonths(count: number, now: Date = new Date()): string[] {
   const result: string[] = [];

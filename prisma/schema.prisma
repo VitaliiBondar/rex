@@ -22,8 +22,7 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  responsibleFor Candidate[]    @relation("Responsible")
-  statusChanges  StatusChange[]
+  statusChanges StatusChange[]
 }
 
 model Unit {
@@ -42,14 +41,11 @@ model Candidate {
 
   recruitmentType String // MOBILIZATION | CONTRACT | CONTRACT_18_24
   channel         String // RECRUITING_CENTER | DIRECT
-  status          String @default("NEW")
+  status          String @default("UNIT_SEARCH")
   note            String @default("")
 
   unitId String?
   unit   Unit?   @relation(fields: [unitId], references: [id], onDelete: SetNull)
-
-  responsibleUserId String?
-  responsible       User?   @relation("Responsible", fields: [responsibleUserId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

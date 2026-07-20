@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { StatusSelect } from "@/components/status-select";
+import { StatusBadge } from "@/components/status-badge";
 import { StageTrack } from "@/components/stage-track";
 import { recruitmentTypeLabel, channelLabel } from "@/lib/domain";
+import { formatDate } from "@/lib/format";
 
 export type CandidateRow = {
   id: string;
@@ -11,7 +13,7 @@ export type CandidateRow = {
   channel: string;
   status: string;
   unit: { name: string } | null;
-  responsible: { name: string } | null;
+  enlistedAt: Date | null;
 };
 
 function Chip({ children }: { children: React.ReactNode }) {
@@ -22,13 +24,21 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function CandidateList({ candidates }: { candidates: CandidateRow[] }) {
+export function CandidateList({
+  candidates,
+  isCurrentMonth,
+}: {
+  candidates: CandidateRow[];
+  isCurrentMonth: boolean;
+}) {
   if (candidates.length === 0) {
     return (
       <div className="mx-4 sm:mx-6 my-10 rounded-lg border border-dashed border-border-strong p-10 text-center">
         <p className="text-sm font-medium text-ink">Кандидатів не знайдено</p>
         <p className="mt-1 text-sm text-ink-soft">
-          Змініть фільтри або додайте нового кандидата.
+          {isCurrentMonth
+            ? "Змініть фільтри або додайте нового кандидата."
+            : "У цьому місяці кандидатів, що відповідають фільтрам, не було."}
         </p>
       </div>
     );
@@ -45,7 +55,7 @@ export function CandidateList({ candidates }: { candidates: CandidateRow[] }) {
                 <Th>Кандидат</Th>
                 <Th>Тип · канал</Th>
                 <Th>Підрозділ</Th>
-                <Th>Відповідальний</Th>
+                <Th>Дата зарахування</Th>
                 <Th className="w-40">Етап</Th>
                 <Th className="w-48">Статус</Th>
               </tr>
@@ -77,13 +87,17 @@ export function CandidateList({ candidates }: { candidates: CandidateRow[] }) {
                     {c.unit?.name ?? "—"}
                   </td>
                   <td className="px-4 py-3 text-ink-soft">
-                    {c.responsible?.name ?? "—"}
+                    {c.enlistedAt ? formatDate(c.enlistedAt) : "—"}
                   </td>
                   <td className="px-4 py-3">
                     <StageTrack status={c.status} />
                   </td>
                   <td className="px-4 py-3">
-                    <StatusSelect candidateId={c.id} status={c.status} />
+                    {isCurrentMonth ? (
+                      <StatusSelect candidateId={c.id} status={c.status} />
+                    ) : (
+                      <StatusBadge status={c.status} />
+                    )}
                   </td>
                 </tr>
               ))}
@@ -111,7 +125,11 @@ export function CandidateList({ candidates }: { candidates: CandidateRow[] }) {
                   <p className="text-xs text-ink-faint">{c.position}</p>
                 )}
               </div>
-              <StatusSelect candidateId={c.id} status={c.status} />
+              {isCurrentMonth ? (
+                <StatusSelect candidateId={c.id} status={c.status} />
+              ) : (
+                <StatusBadge status={c.status} />
+              )}
             </div>
             <div className="mt-3">
               <StageTrack status={c.status} />
@@ -120,7 +138,7 @@ export function CandidateList({ candidates }: { candidates: CandidateRow[] }) {
               <Chip>{recruitmentTypeLabel(c.recruitmentType)}</Chip>
               <Chip>{channelLabel(c.channel)}</Chip>
               {c.unit && <Chip>{c.unit.name}</Chip>}
-              {c.responsible && <Chip>{c.responsible.name}</Chip>}
+              {c.enlistedAt && <Chip>Зараховано: {formatDate(c.enlistedAt)}</Chip>}
             </div>
           </div>
         ))}

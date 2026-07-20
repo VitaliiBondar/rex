@@ -1,12 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import {
-  getCandidateById,
-  getUnits,
-  getUsers,
-  getPositions,
-} from "@/lib/queries";
+import { getCandidateById, getUnits, getPositions } from "@/lib/queries";
 import { StageTrack } from "@/components/stage-track";
 import { StatusSelect } from "@/components/status-select";
 import { StatusBadge } from "@/components/status-badge";
@@ -17,6 +12,7 @@ import {
   genderLabel,
 } from "@/lib/domain";
 import { formatDate, formatDateTime } from "@/lib/format";
+import { enlistedDate } from "@/lib/stats";
 import { CandidateActions } from "./edit-candidate-button";
 
 export default async function CandidateDetailPage({
@@ -25,16 +21,14 @@ export default async function CandidateDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [candidate, units, users, positions] = await Promise.all([
+  const [candidate, units, positions] = await Promise.all([
     getCandidateById(id),
     getUnits(),
-    getUsers(),
     getPositions(),
   ]);
 
   if (!candidate) notFound();
 
-  const userOptions = users.map((u) => ({ id: u.id, name: u.name }));
   const defaultValues = {
     fullName: candidate.fullName,
     age: candidate.age != null ? String(candidate.age) : "",
@@ -43,9 +37,9 @@ export default async function CandidateDetailPage({
     unitId: candidate.unitId ?? "",
     recruitmentType: candidate.recruitmentType,
     channel: candidate.channel,
-    responsibleUserId: candidate.responsibleUserId ?? "",
     note: candidate.note ?? "",
   };
+  const enlistedAt = enlistedDate(candidate);
 
   return (
     <div className="max-w-4xl">
@@ -70,7 +64,6 @@ export default async function CandidateDetailPage({
               candidateId={candidate.id}
               defaultValues={defaultValues}
               units={units}
-              users={userOptions}
               positions={positions}
             />
           </div>
@@ -108,8 +101,11 @@ export default async function CandidateDetailPage({
             <Info label="Підрозділ" value={candidate.unit?.name ?? "—"} />
             <Info label="Вік" value={candidate.age != null ? String(candidate.age) : "—"} />
             <Info label="Стать" value={genderLabel(candidate.gender)} />
-            <Info label="Відповідальний" value={candidate.responsible?.name ?? "—"} />
             <Info label="Додано" value={formatDate(candidate.createdAt)} />
+            <Info
+              label="Дата зарахування"
+              value={enlistedAt ? formatDate(enlistedAt) : "—"}
+            />
           </dl>
         </Card>
 

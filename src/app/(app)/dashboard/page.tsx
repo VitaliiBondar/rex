@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { uk } from "date-fns/locale";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
-import { getCandidatesForStats, getUsers } from "@/lib/queries";
+import { getCandidatesForStats } from "@/lib/queries";
 import {
   filterCandidates,
   addedInMonth,
@@ -39,15 +39,11 @@ export default async function DashboardPage({
   const sp = await searchParams;
   const month = sp.month || currentMonth();
 
-  const [all, users] = await Promise.all([
-    getCandidatesForStats(),
-    getUsers(),
-  ]);
+  const all = await getCandidatesForStats();
 
   const filtered = filterCandidates(all, {
     recruitmentType: sp.recruitmentType,
     channel: sp.channel,
-    responsibleUserId: sp.responsibleUserId,
   });
 
   const added = addedInMonth(filtered, month);
@@ -103,11 +99,7 @@ export default async function DashboardPage({
       <PageHeader eyebrow="Статистика" title="Дашборд" />
 
       <div className="px-4 sm:px-6 py-4 border-b border-border bg-surface">
-        <DashboardControls
-          months={trendMonths}
-          currentMonth={month}
-          users={users.map((u) => ({ id: u.id, name: u.name }))}
-        />
+        <DashboardControls months={trendMonths} currentMonth={month} />
         <p className="mt-2 text-sm text-ink-soft">
           Показники за <span className="font-medium text-ink">{monthLabel(month)}</span>
         </p>

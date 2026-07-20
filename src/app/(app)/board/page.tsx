@@ -11,7 +11,6 @@ export default async function BoardPage() {
     recruitmentType: c.recruitmentType,
     channel: c.channel,
     status: c.status,
-    responsibleName: c.responsible?.name ?? null,
   }));
 
   return (

@@ -12,11 +12,9 @@ import { monthLabel } from "@/lib/format";
 export function DashboardControls({
   months,
   currentMonth,
-  users,
 }: {
   months: string[];
   currentMonth: string;
-  users: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -69,19 +67,6 @@ export function DashboardControls({
         {CHANNELS.map((c) => (
           <option key={c} value={c}>
             {CHANNEL_LABELS[c]}
-          </option>
-        ))}
-      </select>
-
-      <select
-        value={params.get("responsibleUserId") ?? ""}
-        onChange={(e) => setParam("responsibleUserId", e.target.value)}
-        className={selectClass}
-      >
-        <option value="">Усі відповідальні</option>
-        {users.map((u) => (
-          <option key={u.id} value={u.id}>
-            {u.name}
           </option>
         ))}
       </select>

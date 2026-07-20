@@ -32,11 +32,10 @@ export async function createCandidate(input: unknown): Promise<ActionResult> {
       unitId: data.unitId,
       recruitmentType: data.recruitmentType,
       channel: data.channel,
-      responsibleUserId: data.responsibleUserId ?? user.id,
       note: data.note ?? "",
-      status: "NEW",
+      status: "UNIT_SEARCH",
       statusChanges: {
-        create: { fromStatus: null, toStatus: "NEW", changedById: user.id },
+        create: { fromStatus: null, toStatus: "UNIT_SEARCH", changedById: user.id },
       },
     },
   });
@@ -66,7 +65,6 @@ export async function updateCandidate(
       unitId: data.unitId ?? null,
       recruitmentType: data.recruitmentType,
       channel: data.channel,
-      responsibleUserId: data.responsibleUserId ?? null,
       note: data.note ?? "",
     },
   });

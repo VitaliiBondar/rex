@@ -15,15 +15,16 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import {
-  STATUSES,
+  ACTIVE_STATUSES,
   STATUS_LABELS,
   STATUS_COLORS,
   recruitmentTypeLabel,
   channelLabel,
-  type Status,
 } from "@/lib/domain";
 import { changeCandidateStatus } from "@/lib/actions/candidates";
 import { cn } from "@/lib/utils";
+import { Modal } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 
 export type BoardCandidate = {
   id: string;
@@ -32,12 +33,36 @@ export type BoardCandidate = {
   recruitmentType: string;
   channel: string;
   status: string;
-  responsibleName: string | null;
+};
+
+// Колонки канбану: 4 активні етапи + "Зараховано" окремо + віртуальна мердж-колонка
+// "Відмови" (об'єднує REJECTED_BY_US/SELF_WITHDREW візуально; в даних статуси лишаються
+// окремими — це критично для статистики на Дашборді).
+type ColumnDef = { id: string; label: string; statuses: string[] };
+
+const COLUMNS: ColumnDef[] = [
+  ...ACTIVE_STATUSES.map((s) => ({
+    id: s as string,
+    label: STATUS_LABELS[s],
+    statuses: [s as string],
+  })),
+  { id: "ENLISTED", label: STATUS_LABELS.ENLISTED, statuses: ["ENLISTED"] },
+  {
+    id: "REJECTED",
+    label: "Відмови",
+    statuses: ["REJECTED_BY_US", "SELF_WITHDREW"],
+  },
+];
+
+const REJECTION_REASON_LABELS: Record<string, string> = {
+  REJECTED_BY_US: "з нашого боку",
+  SELF_WITHDREW: "сам відмовився",
 };
 
 export function BoardClient({ initial }: { initial: BoardCandidate[] }) {
   const [cards, setCards] = useState<BoardCandidate[]>(initial);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [pendingReject, setPendingReject] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -46,6 +71,13 @@ export function BoardClient({ initial }: { initial: BoardCandidate[] }) {
     }),
   );
 
+  const applyStatusChange = (cardId: string, status: string) => {
+    setCards((prev) =>
+      prev.map((c) => (c.id === cardId ? { ...c, status } : c)),
+    );
+    changeCandidateStatus({ candidateId: cardId, status });
+  };
+
   const onDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
 
   const onDragEnd = (e: DragEndEvent) => {
@@ -53,15 +85,18 @@ export function BoardClient({ initial }: { initial: BoardCandidate[] }) {
     const { active, over } = e;
     if (!over) return;
     const cardId = String(active.id);
-    const newStatus = String(over.id);
+    const overId = String(over.id);
     const card = cards.find((c) => c.id === cardId);
-    if (!card || card.status === newStatus) return;
+    if (!card) return;
+    const column = COLUMNS.find((c) => c.id === overId);
+    if (!column || column.statuses.includes(card.status)) return;
 
-    // Оптимістичне оновлення + серверна дія.
-    setCards((prev) =>
-      prev.map((c) => (c.id === cardId ? { ...c, status: newStatus } : c)),
-    );
-    changeCandidateStatus({ candidateId: cardId, status: newStatus });
+    if (overId === "REJECTED") {
+      // Віртуальна колонка не відповідає одному реальному статусу — питаємо причину.
+      setPendingReject(cardId);
+      return;
+    }
+    applyStatusChange(cardId, overId);
   };
 
   const activeCard = cards.find((c) => c.id === activeId) ?? null;
@@ -73,39 +108,67 @@ export function BoardClient({ initial }: { initial: BoardCandidate[] }) {
       onDragEnd={onDragEnd}
     >
       <div className="flex gap-3 overflow-x-auto p-4 sm:p-6">
-        {STATUSES.map((status) => (
+        {COLUMNS.map((column) => (
           <Column
-            key={status}
-            status={status}
-            cards={cards.filter((c) => c.status === status)}
+            key={column.id}
+            column={column}
+            cards={cards.filter((c) => column.statuses.includes(c.status))}
           />
         ))}
       </div>
       <DragOverlay>
         {activeCard ? <CardBody card={activeCard} dragging /> : null}
       </DragOverlay>
+
+      <Modal
+        open={pendingReject !== null}
+        onClose={() => setPendingReject(null)}
+        title="Причина відмови"
+      >
+        <p className="text-sm text-ink-soft mb-4">
+          Виберіть причину, щоб перенести кандидата в колонку «Відмови».
+        </p>
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (pendingReject) applyStatusChange(pendingReject, "REJECTED_BY_US");
+              setPendingReject(null);
+            }}
+          >
+            Відмова з нашого боку
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (pendingReject) applyStatusChange(pendingReject, "SELF_WITHDREW");
+              setPendingReject(null);
+            }}
+          >
+            Відмовився сам
+          </Button>
+        </div>
+      </Modal>
     </DndContext>
   );
 }
 
 function Column({
-  status,
+  column,
   cards,
 }: {
-  status: Status;
+  column: ColumnDef;
   cards: BoardCandidate[];
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: status });
+  const { setNodeRef, isOver } = useDroppable({ id: column.id });
   return (
     <div className="flex w-72 shrink-0 flex-col">
       <div className="flex items-center gap-2 px-1 pb-2">
         <span
           className="h-2.5 w-2.5 rounded-full"
-          style={{ background: STATUS_COLORS[status] }}
+          style={{ background: STATUS_COLORS[column.statuses[0] as keyof typeof STATUS_COLORS] }}
         />
-        <span className="text-sm font-medium text-ink">
-          {STATUS_LABELS[status]}
-        </span>
+        <span className="text-sm font-medium text-ink">{column.label}</span>
         <span className="tnum text-xs text-ink-faint">{cards.length}</span>
       </div>
       <div
@@ -148,6 +211,7 @@ function CardBody({
   card: BoardCandidate;
   dragging?: boolean;
 }) {
+  const reason = REJECTION_REASON_LABELS[card.status];
   return (
     <div
       className={cn(
@@ -176,10 +240,10 @@ function CardBody({
           {channelLabel(card.channel)}
         </span>
       </div>
-      {card.responsibleName && (
-        <p className="mt-2 text-[11px] text-ink-faint">
-          {card.responsibleName}
-        </p>
+      {reason && (
+        <span className="mt-2 inline-block rounded bg-red-50 px-1.5 py-0.5 text-[11px] text-red-700 dark:bg-red-950/40 dark:text-red-300">
+          {reason}
+        </span>
       )}
     </div>
   );

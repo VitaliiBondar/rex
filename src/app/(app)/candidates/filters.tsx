@@ -11,11 +11,7 @@ import {
   CHANNEL_LABELS,
 } from "@/lib/domain";
 
-export function CandidateFilters({
-  users,
-}: {
-  users: { id: string; name: string }[];
-}) {
+export function CandidateFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -27,8 +23,8 @@ export function CandidateFilters({
     router.push(`${pathname}?${next.toString()}`);
   };
 
-  const hasFilters = ["q", "status", "recruitmentType", "channel", "responsibleUserId"].some(
-    (k) => params.get(k),
+  const hasFilters = ["q", "status", "recruitmentType", "channel"].some((k) =>
+    params.get(k),
   );
 
   const selectClass =
@@ -89,22 +85,15 @@ export function CandidateFilters({
         ))}
       </select>
 
-      <select
-        value={params.get("responsibleUserId") ?? ""}
-        onChange={(e) => setParam("responsibleUserId", e.target.value)}
-        className={selectClass}
-      >
-        <option value="">Усі відповідальні</option>
-        {users.map((u) => (
-          <option key={u.id} value={u.id}>
-            {u.name}
-          </option>
-        ))}
-      </select>
-
       {hasFilters && (
         <button
-          onClick={() => router.push(pathname)}
+          onClick={() => {
+            // Скидаємо лише фільтри, зберігаючи вибраний місяць у URL.
+            const next = new URLSearchParams();
+            const month = params.get("month");
+            if (month) next.set("month", month);
+            router.push(`${pathname}?${next.toString()}`);
+          }}
           className="inline-flex h-9 items-center gap-1 rounded-md px-2.5 text-sm text-ink-soft hover:bg-surface-2 hover:text-ink"
         >
           <X className="h-4 w-4" /> Скинути

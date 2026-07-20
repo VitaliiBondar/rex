@@ -25,7 +25,6 @@ export type CandidateFormValues = {
   unitId: string;
   recruitmentType: string;
   channel: string;
-  responsibleUserId: string;
   note: string;
 };
 
@@ -33,14 +32,12 @@ export function CandidateForm({
   candidateId,
   defaultValues,
   units,
-  users,
   positions,
   onDone,
 }: {
   candidateId?: string;
   defaultValues?: Partial<CandidateFormValues>;
   units: { id: string; name: string }[];
-  users: { id: string; name: string }[];
   positions: string[];
   onDone: () => void;
 }) {
@@ -59,7 +56,6 @@ export function CandidateForm({
       unitId: "",
       recruitmentType: "CONTRACT",
       channel: "DIRECT",
-      responsibleUserId: "",
       note: "",
       ...defaultValues,
     } as unknown as CandidateInput,
@@ -140,17 +136,6 @@ export function CandidateForm({
           </datalist>
         </Field>
       </div>
-
-      <Field label="Відповідальний" htmlFor="responsibleUserId">
-        <Select id="responsibleUserId" {...register("responsibleUserId")}>
-          <option value="">— (я)</option>
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name}
-            </option>
-          ))}
-        </Select>
-      </Field>
 
       <Field label="Примітка" htmlFor="note" error={errors.note?.message}>
         <Textarea id="note" {...register("note")} placeholder="Специфічна інформація по кандидату…" />

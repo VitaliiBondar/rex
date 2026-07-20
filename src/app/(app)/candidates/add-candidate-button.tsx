@@ -8,11 +8,9 @@ import { CandidateForm } from "./candidate-form";
 
 export function AddCandidateButton({
   units,
-  users,
   positions,
 }: {
   units: { id: string; name: string }[];
-  users: { id: string; name: string }[];
   positions: string[];
 }) {
   const [open, setOpen] = useState(false);
@@ -27,7 +25,6 @@ export function AddCandidateButton({
       <Modal open={open} onClose={() => setOpen(false)} title="Новий кандидат">
         <CandidateForm
           units={units}
-          users={users}
           positions={positions}
           onDone={() => setOpen(false)}
         />

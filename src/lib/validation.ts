@@ -32,7 +32,6 @@ export const candidateSchema = z.object({
   unitId: z.preprocess(emptyToUndefined, z.string().optional()),
   recruitmentType: z.enum(RECRUITMENT_TYPES),
   channel: z.enum(CHANNELS),
-  responsibleUserId: z.preprocess(emptyToUndefined, z.string().optional()),
   note: z.preprocess(emptyToUndefined, z.string().max(5000).optional()),
 });
 export type CandidateInput = z.infer<typeof candidateSchema>;

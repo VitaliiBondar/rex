@@ -40,8 +40,7 @@ export const CHANNEL_LABELS: Record<Channel, string> = {
 
 // ── Статуси (конвеєр) ───────────────────────────────────────────────────────
 export const STATUSES = [
-  "NEW",
-  "IN_PROGRESS",
+  "UNIT_SEARCH",
   "COLLECTING_DOCS",
   "MEDICAL_COMMISSION",
   "CONTRACT_SIGNING",
@@ -52,9 +51,8 @@ export const STATUSES = [
 export type Status = (typeof STATUSES)[number];
 
 export const STATUS_LABELS: Record<Status, string> = {
-  NEW: "Новий",
-  IN_PROGRESS: "В роботі",
-  COLLECTING_DOCS: "Збирає документи",
+  UNIT_SEARCH: "Пошук підрозділу",
+  COLLECTING_DOCS: "Збір документів",
   MEDICAL_COMMISSION: "Проходить ВЛК",
   CONTRACT_SIGNING: "Оформлення",
   ENLISTED: "Зараховано",
@@ -75,8 +73,7 @@ export function isFinalStatus(status: string): boolean {
 
 // Активні статуси (кандидат ще в роботі) — порядок для канбан-колонок.
 export const ACTIVE_STATUSES = [
-  "NEW",
-  "IN_PROGRESS",
+  "UNIT_SEARCH",
   "COLLECTING_DOCS",
   "MEDICAL_COMMISSION",
   "CONTRACT_SIGNING",
@@ -84,8 +81,7 @@ export const ACTIVE_STATUSES = [
 
 // Tailwind-класи бейджів для кожного статусу (світла/темна тема через префікси).
 export const STATUS_BADGE_CLASSES: Record<Status, string> = {
-  NEW: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200",
-  IN_PROGRESS: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-200",
+  UNIT_SEARCH: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200",
   COLLECTING_DOCS:
     "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-200",
   MEDICAL_COMMISSION:
@@ -101,8 +97,7 @@ export const STATUS_BADGE_CLASSES: Record<Status, string> = {
 
 // Кольори (hex) для графіків Recharts.
 export const STATUS_COLORS: Record<Status, string> = {
-  NEW: "#94a3b8",
-  IN_PROGRESS: "#3b82f6",
+  UNIT_SEARCH: "#94a3b8",
   COLLECTING_DOCS: "#6366f1",
   MEDICAL_COMMISSION: "#f59e0b",
   CONTRACT_SIGNING: "#8b5cf6",

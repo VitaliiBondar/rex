@@ -15,7 +15,6 @@ export type StatCandidate = {
   status: string;
   recruitmentType: string;
   channel: string;
-  responsibleUserId: string | null;
   statusChanges: StatStatusChange[];
 };
 
@@ -103,24 +102,23 @@ export function countBy(
 export type CandidateFilter = {
   recruitmentType?: string;
   channel?: string;
-  responsibleUserId?: string;
   status?: string;
+  q?: string;
 };
 
-export function filterCandidates(
-  candidates: StatCandidate[],
+export function filterCandidates<C extends StatCandidate & { fullName?: string }>(
+  candidates: C[],
   filter: CandidateFilter,
-): StatCandidate[] {
+): C[] {
   return candidates.filter((c) => {
     if (filter.recruitmentType && c.recruitmentType !== filter.recruitmentType)
       return false;
     if (filter.channel && c.channel !== filter.channel) return false;
-    if (
-      filter.responsibleUserId &&
-      c.responsibleUserId !== filter.responsibleUserId
-    )
-      return false;
     if (filter.status && c.status !== filter.status) return false;
+    if (filter.q) {
+      const name = c.fullName ?? "";
+      if (!name.toLowerCase().includes(filter.q.toLowerCase())) return false;
+    }
     return true;
   });
 }
@@ -146,4 +144,46 @@ export function monthlyTrend(
     selfWithdrew: reachedStatusInMonth(candidates, "SELF_WITHDREW", month)
       .length,
   }));
+}
+
+// ── Помісячний знімок (для перегляду списку кандидатів по місяцях) ──────────
+// Для місяця M повертає кандидатів, релевантних саме цьому місяцю:
+//   - ще активні на кінець M (включно з перенесеними з попередніх місяців) —
+//     зі статусом "на той момент" (не поточним живим);
+//   - фіналізовані (зараховано/відмова) САМЕ В МЕЖАХ M.
+// Кандидат, що фіналізувався РАНІШЕ M, у результат не потрапляє — для M він вже
+// "стара новина". `status` у результаті — це історичний знімок на місяць M,
+// а не поточне живе значення candidate.status.
+export function candidatesForMonth<C extends StatCandidate>(
+  candidates: C[],
+  month: string,
+): (Omit<C, "status"> & { status: string })[] {
+  const { end } = monthRange(month);
+  const lastInstant = new Date(end.getTime() - 1);
+  type WithStatus = Omit<C, "status"> & { status: string };
+
+  const active = activeAtEndOfMonth(candidates, month).map(
+    (c) => ({ ...c, status: statusAt(c, lastInstant) as string }) as WithStatus,
+  );
+
+  const finalized = (FINAL_STATUSES as readonly string[]).flatMap((status) =>
+    reachedStatusInMonth(candidates, status, month).map(
+      (c) => ({ ...c, status }) as WithStatus,
+    ),
+  );
+
+  return [...active, ...finalized];
+}
+
+// ── Дата зарахування ─────────────────────────────────────────────────────────
+// Дата першого переходу в ENLISTED, або null, якщо кандидат не зарахований.
+export function enlistedDate(candidate: StatCandidate): Date | null {
+  const enlistings = candidate.statusChanges.filter(
+    (c) => c.toStatus === "ENLISTED",
+  );
+  if (enlistings.length === 0) return null;
+  return enlistings.reduce(
+    (min, c) => (c.changedAt < min ? c.changedAt : min),
+    enlistings[0].changedAt,
+  );
 }
