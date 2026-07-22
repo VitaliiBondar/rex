@@ -25,6 +25,7 @@ import { changeCandidateStatus } from "@/lib/actions/candidates";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { RequireUnitModal } from "@/components/require-unit-modal";
 
 export type BoardCandidate = {
   id: string;
@@ -59,10 +60,20 @@ const REJECTION_REASON_LABELS: Record<string, string> = {
   SELF_WITHDREW: "сам відмовився",
 };
 
-export function BoardClient({ initial }: { initial: BoardCandidate[] }) {
+export function BoardClient({
+  initial,
+  units,
+}: {
+  initial: BoardCandidate[];
+  units: { id: string; name: string }[];
+}) {
   const [cards, setCards] = useState<BoardCandidate[]>(initial);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pendingReject, setPendingReject] = useState<string | null>(null);
+  const [pendingUnit, setPendingUnit] = useState<{
+    cardId: string;
+    status: string;
+  } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -71,11 +82,32 @@ export function BoardClient({ initial }: { initial: BoardCandidate[] }) {
     }),
   );
 
-  const applyStatusChange = (cardId: string, status: string) => {
+  const applyStatusChange = async (
+    cardId: string,
+    status: string,
+    unitId?: string,
+  ) => {
+    const previousStatus = cards.find((c) => c.id === cardId)?.status;
     setCards((prev) =>
       prev.map((c) => (c.id === cardId ? { ...c, status } : c)),
     );
-    changeCandidateStatus({ candidateId: cardId, status });
+    const result = await changeCandidateStatus({
+      candidateId: cardId,
+      status,
+      unitId,
+    });
+    if (!result.ok) {
+      if (previousStatus) {
+        setCards((prev) =>
+          prev.map((c) =>
+            c.id === cardId ? { ...c, status: previousStatus } : c,
+          ),
+        );
+      }
+      if (result.code === "NEEDS_UNIT") {
+        setPendingUnit({ cardId, status });
+      }
+    }
   };
 
   const onDragStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
@@ -149,6 +181,18 @@ export function BoardClient({ initial }: { initial: BoardCandidate[] }) {
           </Button>
         </div>
       </Modal>
+
+      <RequireUnitModal
+        open={pendingUnit !== null}
+        units={units}
+        onClose={() => setPendingUnit(null)}
+        onConfirm={(unitId) => {
+          if (pendingUnit) {
+            applyStatusChange(pendingUnit.cardId, pendingUnit.status, unitId);
+          }
+          setPendingUnit(null);
+        }}
+      />
     </DndContext>
   );
 }
