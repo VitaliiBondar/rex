@@ -223,7 +223,6 @@ function CardBody({
         <Link
           href={`/candidates/${card.id}`}
           onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
           className="text-sm font-medium text-ink hover:underline"
         >
           {card.fullName}
