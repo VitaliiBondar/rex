@@ -91,21 +91,31 @@ export function BoardClient({
     setCards((prev) =>
       prev.map((c) => (c.id === cardId ? { ...c, status } : c)),
     );
-    const result = await changeCandidateStatus({
-      candidateId: cardId,
-      status,
-      unitId,
-    });
-    if (!result.ok) {
+    try {
+      const result = await changeCandidateStatus({
+        candidateId: cardId,
+        status,
+        unitId,
+      });
+      if (!result.ok) {
+        if (previousStatus) {
+          setCards((prev) =>
+            prev.map((c) =>
+              c.id === cardId ? { ...c, status: previousStatus } : c,
+            ),
+          );
+        }
+        if (result.code === "NEEDS_UNIT") {
+          setPendingUnit({ cardId, status });
+        }
+      }
+    } catch {
       if (previousStatus) {
         setCards((prev) =>
           prev.map((c) =>
             c.id === cardId ? { ...c, status: previousStatus } : c,
           ),
         );
-      }
-      if (result.code === "NEEDS_UNIT") {
-        setPendingUnit({ cardId, status });
       }
     }
   };
