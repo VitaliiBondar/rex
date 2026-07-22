@@ -27,9 +27,11 @@ function Chip({ children }: { children: React.ReactNode }) {
 export function CandidateList({
   candidates,
   isCurrentMonth,
+  units,
 }: {
   candidates: CandidateRow[];
   isCurrentMonth: boolean;
+  units: { id: string; name: string }[];
 }) {
   if (candidates.length === 0) {
     return (
@@ -94,7 +96,11 @@ export function CandidateList({
                   </td>
                   <td className="px-4 py-3">
                     {isCurrentMonth ? (
-                      <StatusSelect candidateId={c.id} status={c.status} />
+                      <StatusSelect
+                        candidateId={c.id}
+                        status={c.status}
+                        units={units}
+                      />
                     ) : (
                       <StatusBadge status={c.status} />
                     )}
@@ -126,7 +132,11 @@ export function CandidateList({
                 )}
               </div>
               {isCurrentMonth ? (
-                <StatusSelect candidateId={c.id} status={c.status} />
+                <StatusSelect
+                  candidateId={c.id}
+                  status={c.status}
+                  units={units}
+                />
               ) : (
                 <StatusBadge status={c.status} />
               )}

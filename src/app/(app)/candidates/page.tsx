@@ -63,7 +63,11 @@ export default async function CandidatesPage({
         </Suspense>
       </div>
 
-      <CandidateList candidates={candidates} isCurrentMonth={isCurrentMonth} />
+      <CandidateList
+        candidates={candidates}
+        isCurrentMonth={isCurrentMonth}
+        units={units}
+      />
     </>
   );
 }

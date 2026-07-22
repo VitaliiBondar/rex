@@ -83,6 +83,7 @@ export default async function CandidateDetailPage({
               <StatusSelect
                 candidateId={candidate.id}
                 status={candidate.status}
+                units={units}
                 className="h-9 text-sm"
               />
             </div>
