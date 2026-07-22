@@ -131,3 +131,17 @@ export function genderLabel(value: string | null | undefined): string {
   if (!value) return "—";
   return GENDER_LABELS[value as Gender] ?? value;
 }
+
+// Чи потрібен вказаний підрозділ, щоб дозволити цей перехід статусу.
+// Підрозділ обов'язковий, коли кандидат покидає «Пошук підрозділу» заради
+// просування конвеєром — але не для відмов (це завершення шляху).
+export function requiresUnitAssignment(
+  fromStatus: string,
+  toStatus: string,
+): boolean {
+  return (
+    fromStatus === "UNIT_SEARCH" &&
+    toStatus !== "REJECTED_BY_US" &&
+    toStatus !== "SELF_WITHDREW"
+  );
+}
