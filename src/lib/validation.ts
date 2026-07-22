@@ -39,6 +39,7 @@ export type CandidateInput = z.infer<typeof candidateSchema>;
 export const statusChangeSchema = z.object({
   candidateId: z.string().min(1),
   status: z.enum(STATUSES),
+  unitId: z.string().min(1).optional(),
 });
 
 // ── Користувач (керує адмін) ────────────────────────────────────────────────

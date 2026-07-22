@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/session";
 import { candidateSchema, statusChangeSchema } from "@/lib/validation";
+import { requiresUnitAssignment } from "@/lib/domain";
 
 export type ActionResult =
   | { ok: true; id?: string }
-  | { ok: false; error: string };
+  | { ok: false; error: string; code?: "NEEDS_UNIT" };
 
 function revalidateAll() {
   revalidatePath("/candidates");
@@ -83,19 +84,32 @@ export async function changeCandidateStatus(
   if (!parsed.success) {
     return { ok: false, error: "Некоректний статус" };
   }
-  const { candidateId, status } = parsed.data;
+  const { candidateId, status, unitId } = parsed.data;
 
   const candidate = await prisma.candidate.findUnique({
     where: { id: candidateId },
-    select: { status: true },
+    select: { status: true, unitId: true },
   });
   if (!candidate) return { ok: false, error: "Кандидата не знайдено" };
   if (candidate.status === status) return { ok: true, id: candidateId };
+
+  const effectiveUnitId = unitId ?? candidate.unitId;
+  if (
+    requiresUnitAssignment(candidate.status, status) &&
+    !effectiveUnitId
+  ) {
+    return {
+      ok: false,
+      error: "Спочатку вкажіть підрозділ",
+      code: "NEEDS_UNIT",
+    };
+  }
 
   await prisma.candidate.update({
     where: { id: candidateId },
     data: {
       status,
+      ...(unitId ? { unitId } : {}),
       statusChanges: {
         create: {
           fromStatus: candidate.status,
