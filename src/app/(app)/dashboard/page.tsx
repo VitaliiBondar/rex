@@ -96,7 +96,7 @@ export default async function DashboardPage({
 
   return (
     <>
-      <PageHeader eyebrow="Статистика" title="Дашборд" />
+      <PageHeader title="Дашборд" />
 
       <div className="px-4 sm:px-6 py-4 border-b border-border bg-surface">
         <DashboardControls months={trendMonths} currentMonth={month} />

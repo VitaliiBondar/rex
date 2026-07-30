@@ -40,12 +40,12 @@ export function Modal({
       aria-label={title}
     >
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-overlay-in"
         onClick={onClose}
       />
       <div
         className={cn(
-          "relative z-10 w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-lg border border-border bg-surface shadow-xl",
+          "relative z-10 w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-lg border border-border bg-surface shadow-xl animate-panel-in",
           className,
         )}
       >

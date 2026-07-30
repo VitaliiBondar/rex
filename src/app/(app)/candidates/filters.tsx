@@ -88,10 +88,12 @@ export function CandidateFilters() {
       {hasFilters && (
         <button
           onClick={() => {
-            // Скидаємо лише фільтри, зберігаючи вибраний місяць у URL.
+            // Скидаємо лише фільтри, зберігаючи місяць і сортування в URL.
             const next = new URLSearchParams();
-            const month = params.get("month");
-            if (month) next.set("month", month);
+            for (const key of ["month", "sort", "dir"]) {
+              const value = params.get(key);
+              if (value) next.set(key, value);
+            }
             router.push(`${pathname}?${next.toString()}`);
           }}
           className="inline-flex h-9 items-center gap-1 rounded-md px-2.5 text-sm text-ink-soft hover:bg-surface-2 hover:text-ink"

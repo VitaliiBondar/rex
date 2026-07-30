@@ -10,7 +10,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Адміністрування" title="Налаштування" />
+      <PageHeader title="Налаштування" />
       <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl">
         <UserManager users={users} currentUserId={admin.id} />
         <UnitManager units={units} />

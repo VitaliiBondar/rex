@@ -269,7 +269,7 @@ function CardBody({
   return (
     <div
       className={cn(
-        "rounded-md border border-border bg-surface p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] cursor-grab active:cursor-grabbing",
+        "rounded-md border border-border bg-surface p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] cursor-grab transition-shadow duration-150 hover:shadow-md active:cursor-grabbing",
         dragging && "rotate-2 shadow-lg cursor-grabbing",
       )}
     >

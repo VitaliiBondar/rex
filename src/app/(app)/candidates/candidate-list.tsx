@@ -28,11 +28,28 @@ export function CandidateList({
   candidates,
   isCurrentMonth,
   units,
+  searchParams,
+  currentSort = "fullName",
+  currentDir = "asc",
 }: {
   candidates: CandidateRow[];
   isCurrentMonth: boolean;
   units: { id: string; name: string }[];
+  searchParams?: Record<string, string | undefined>;
+  currentSort?: string;
+  currentDir?: "asc" | "desc";
 }) {
+  function sortHref(column: string): string {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(searchParams ?? {})) {
+      if (v) params.set(k, v);
+    }
+    const nextDir =
+      currentSort === column && currentDir === "asc" ? "desc" : "asc";
+    params.set("sort", column);
+    params.set("dir", nextDir);
+    return `/candidates?${params.toString()}`;
+  }
   if (candidates.length === 0) {
     return (
       <div className="mx-4 sm:mx-6 my-10 rounded-lg border border-dashed border-border-strong p-10 text-center">
@@ -54,19 +71,48 @@ export function CandidateList({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-surface-2 text-left">
-                <Th>Кандидат</Th>
+                <Th
+                  sortKey="fullName"
+                  currentSort={currentSort}
+                  currentDir={currentDir}
+                  href={sortHref("fullName")}
+                >
+                  Кандидат
+                </Th>
                 <Th>Тип · канал</Th>
-                <Th>Підрозділ</Th>
-                <Th>Дата зарахування</Th>
+                <Th
+                  sortKey="unit"
+                  currentSort={currentSort}
+                  currentDir={currentDir}
+                  href={sortHref("unit")}
+                >
+                  Підрозділ
+                </Th>
+                <Th
+                  sortKey="enlistedAt"
+                  currentSort={currentSort}
+                  currentDir={currentDir}
+                  href={sortHref("enlistedAt")}
+                >
+                  Дата зарахування
+                </Th>
                 <Th className="w-40">Етап</Th>
-                <Th className="w-48">Статус</Th>
+                <Th
+                  className="w-48"
+                  sortKey="status"
+                  currentSort={currentSort}
+                  currentDir={currentDir}
+                  href={sortHref("status")}
+                >
+                  Статус
+                </Th>
               </tr>
             </thead>
             <tbody>
               {candidates.map((c) => (
                 <tr
                   key={c.id}
-                  className="border-b border-border last:border-0 bg-surface hover:bg-surface-2"
+                  className="border-b border-border last:border-0 bg-surface transition-colors hover:bg-surface-2"
                 >
                   <td className="px-4 py-3">
                     <Link
@@ -160,15 +206,41 @@ export function CandidateList({
 function Th({
   children,
   className,
+  sortKey,
+  currentSort,
+  currentDir,
+  href,
 }: {
   children: React.ReactNode;
   className?: string;
+  sortKey?: string;
+  currentSort?: string;
+  currentDir?: "asc" | "desc";
+  href?: string;
 }) {
+  if (!sortKey) {
+    return (
+      <th
+        className={`px-4 py-2.5 font-medium text-ink-faint eyebrow ${className ?? ""}`}
+      >
+        {children}
+      </th>
+    );
+  }
+
+  const isActive = currentSort === sortKey;
+
   return (
     <th
       className={`px-4 py-2.5 font-medium text-ink-faint eyebrow ${className ?? ""}`}
     >
-      {children}
+      <Link
+        href={href ?? "#"}
+        className="inline-flex items-center gap-1 hover:text-ink"
+      >
+        {children}
+        {isActive && <span>{currentDir === "desc" ? "▼" : "▲"}</span>}
+      </Link>
     </th>
   );
 }

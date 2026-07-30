@@ -2,60 +2,35 @@
 
 /*
   Дизайн-система «Операційний пульт».
-  Хром спокійний графітовий; насиченість кольору віддана статусам (див. domain.ts).
-  Теми перемикаються за системним налаштуванням (prefers-color-scheme).
+  Єдина темна тема (навмисно, без світлої) — консольно-графітовий хром з
+  акцентним термінальним зеленим на діях і фокусі. Насиченість решти
+  кольорів віддана статусам (див. domain.ts).
 */
 
 :root {
-  --canvas: #f4f4f1;
-  --surface: #ffffff;
-  --surface-2: #fafaf8;
-  --border: #e4e4df;
-  --border-strong: #d3d3cc;
-  --ink: #1a1e26;
-  --ink-soft: #5c6270;
-  --ink-faint: #8a909c;
+  --canvas: #0c0f15;
+  --surface: #141922;
+  --surface-2: #1a2029;
+  --border: #262d39;
+  --border-strong: #333c4a;
+  --ink: #e7e9ee;
+  --ink-soft: #9aa1af;
+  --ink-faint: #6b7280;
 
-  /* Ліва рейка — темний якір інтерфейсу в будь-якій темі. */
-  --rail: #1b2029;
-  --rail-2: #232935;
+  /* Ліва рейка — темний якір інтерфейсу. */
+  --rail: #090c11;
+  --rail-2: #141922;
   --rail-ink: #c3c9d4;
-  --rail-ink-soft: #7d8494;
-  --rail-active: #eef0f3;
-  --rail-active-ink: #1b2029;
+  --rail-ink-soft: #6b7280;
+  --rail-active: #232935;
+  --rail-active-ink: #2fe89c;
 
-  /* Основна дія — інверсний високий контраст. */
-  --brand: #1b2029;
-  --brand-ink: #f7f7f5;
-  --brand-hover: #2c3340;
+  /* Основна дія — термінальний зелений акцент. */
+  --brand: #2fe89c;
+  --brand-ink: #06110c;
+  --brand-hover: #52f0b0;
 
-  --ring: #3b4757;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --canvas: #0c0f15;
-    --surface: #141922;
-    --surface-2: #1a2029;
-    --border: #262d39;
-    --border-strong: #333c4a;
-    --ink: #e7e9ee;
-    --ink-soft: #9aa1af;
-    --ink-faint: #6b7280;
-
-    --rail: #090c11;
-    --rail-2: #141922;
-    --rail-ink: #c3c9d4;
-    --rail-ink-soft: #6b7280;
-    --rail-active: #232935;
-    --rail-active-ink: #f2f4f7;
-
-    --brand: #e7e9ee;
-    --brand-ink: #141922;
-    --brand-hover: #cfd3db;
-
-    --ring: #5b6472;
-  }
+  --ring: #2fe89c;
 }
 
 @theme inline {
@@ -109,6 +84,28 @@ body {
 .tnum {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* Поява модалки — єдиний навмисний «оркестрований» момент анімації в UI. */
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.animate-overlay-in {
+  animation: overlay-in 150ms ease-out;
+}
+
+.animate-panel-in {
+  animation: panel-in 180ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

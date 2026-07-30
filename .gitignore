@@ -57,3 +57,9 @@ skills-lock.json
 
 # git worktrees
 /.worktrees/
+
+# реальні дані кандидатів для разового імпорту (не для git)
+scripts/historical-candidates.data.json
+
+# службові знімки/логи Playwright MCP
+/.playwright-mcp/

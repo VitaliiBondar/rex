@@ -16,6 +16,20 @@ export function MonthNav({ month }: { month: string }) {
     router.push(`${pathname}?${next.toString()}`);
   };
 
+  if (month === "all") {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-ink">Увесь період</span>
+        <button
+          onClick={() => go(currentMonth())}
+          className="text-xs text-ink-soft hover:text-ink underline"
+        >
+          До поточного місяця
+        </button>
+      </div>
+    );
+  }
+
   const isCurrent = month >= currentMonth();
 
   return (
@@ -46,6 +60,12 @@ export function MonthNav({ month }: { month: string }) {
           До поточного місяця
         </button>
       )}
+      <button
+        onClick={() => go("all")}
+        className="ml-2 text-xs text-ink-soft hover:text-ink underline"
+      >
+        Весь період
+      </button>
     </div>
   );
 }

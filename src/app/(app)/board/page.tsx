@@ -18,7 +18,7 @@ export default async function BoardPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Конвеєр" title="Канбан-дошка" />
+      <PageHeader title="Канбан" />
       <p className="px-4 sm:px-6 pt-4 text-sm text-ink-soft">
         Перетягніть картку між колонками, щоб змінити статус. Зміна фіксується в
         історії кандидата.
