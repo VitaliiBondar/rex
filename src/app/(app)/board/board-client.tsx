@@ -20,12 +20,15 @@ import {
   STATUS_COLORS,
   recruitmentTypeLabel,
   channelLabel,
+  type TckType,
 } from "@/lib/domain";
 import { changeCandidateStatus } from "@/lib/actions/candidates";
+import { displayName } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { RequireUnitModal } from "@/components/require-unit-modal";
+import { RequireEnlistmentInfoModal } from "@/components/require-enlistment-info-modal";
 
 export type BoardCandidate = {
   id: string;
@@ -74,6 +77,10 @@ export function BoardClient({
     cardId: string;
     status: string;
   } | null>(null);
+  const [pendingEnlistment, setPendingEnlistment] = useState<{
+    cardId: string;
+    status: string;
+  } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -86,6 +93,7 @@ export function BoardClient({
     cardId: string,
     status: string,
     unitId?: string,
+    enlistmentInfo?: { tckRegion: string; tckType: TckType; orderNumber: string },
   ) => {
     const previousStatus = cards.find((c) => c.id === cardId)?.status;
     setCards((prev) =>
@@ -96,6 +104,7 @@ export function BoardClient({
         candidateId: cardId,
         status,
         unitId,
+        ...enlistmentInfo,
       });
       if (!result.ok) {
         if (previousStatus) {
@@ -107,6 +116,9 @@ export function BoardClient({
         }
         if (result.code === "NEEDS_UNIT") {
           setPendingUnit({ cardId, status });
+        }
+        if (result.code === "NEEDS_ENLISTMENT_INFO") {
+          setPendingEnlistment({ cardId, status });
         }
       }
     } catch {
@@ -203,6 +215,22 @@ export function BoardClient({
           setPendingUnit(null);
         }}
       />
+
+      <RequireEnlistmentInfoModal
+        open={pendingEnlistment !== null}
+        onClose={() => setPendingEnlistment(null)}
+        onConfirm={(info) => {
+          if (pendingEnlistment) {
+            applyStatusChange(
+              pendingEnlistment.cardId,
+              pendingEnlistment.status,
+              undefined,
+              info,
+            );
+          }
+          setPendingEnlistment(null);
+        }}
+      />
     </DndContext>
   );
 }
@@ -279,7 +307,7 @@ function CardBody({
           onClick={(e) => e.stopPropagation()}
           className="text-sm font-medium text-ink hover:underline"
         >
-          {card.fullName}
+          {displayName(card.fullName)}
         </Link>
       </div>
       {card.position && (

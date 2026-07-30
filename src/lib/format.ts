@@ -33,6 +33,12 @@ export function previousMonth(month: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
+// "Прізвище Ім'я [По батькові]" → перші два слова для показу в UI
+// (по батькові зберігається в fullName, але ніде не відображається).
+export function displayName(fullName: string): string {
+  return fullName.trim().split(/\s+/).slice(0, 2).join(" ");
+}
+
 // Останні N місяців (від старих до нових), включно з поточним.
 export function lastMonths(count: number, now: Date = new Date()): string[] {
   const result: string[] = [];

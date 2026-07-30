@@ -132,6 +132,15 @@ export function genderLabel(value: string | null | undefined): string {
   return GENDER_LABELS[value as Gender] ?? value;
 }
 
+// ── Тип ТЦК (для генерації "Повідомлення про зарахування") ──────────────────
+export const TCK_TYPES = ["OMTCK", "RTCK", "MTCK"] as const;
+export type TckType = (typeof TCK_TYPES)[number];
+export const TCK_TYPE_LABELS: Record<TckType, string> = {
+  OMTCK: "ОМТЦК та СП",
+  RTCK: "РТЦК та СП",
+  MTCK: "МТЦК та СП",
+};
+
 // Чи потрібен вказаний підрозділ, щоб дозволити цей перехід статусу.
 // Підрозділ обов'язковий, коли кандидат покидає «Пошук підрозділу» заради
 // просування конвеєром — але не для відмов (це завершення шляху).

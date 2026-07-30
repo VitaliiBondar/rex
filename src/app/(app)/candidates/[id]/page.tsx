@@ -11,9 +11,10 @@ import {
   channelLabel,
   genderLabel,
 } from "@/lib/domain";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime, displayName } from "@/lib/format";
 import { enlistedDate } from "@/lib/stats";
 import { CandidateActions } from "./edit-candidate-button";
+import { GenerateDocumentButton } from "./generate-document-button";
 
 export default async function CandidateDetailPage({
   params,
@@ -38,8 +39,15 @@ export default async function CandidateDetailPage({
     recruitmentType: candidate.recruitmentType,
     channel: candidate.channel,
     note: candidate.note ?? "",
+    orderNumber: candidate.orderNumber ?? "",
+    tckRegion: candidate.tckRegion ?? "",
+    tckType: candidate.tckType ?? "",
   };
   const enlistedAt = enlistedDate(candidate);
+  const isEnlisted = candidate.status === "ENLISTED";
+  const canGenerateDocument =
+    isEnlisted &&
+    Boolean(candidate.orderNumber && candidate.tckRegion && candidate.tckType);
 
   return (
     <div className="max-w-4xl">
@@ -53,18 +61,22 @@ export default async function CandidateDetailPage({
         <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold text-ink">
-              {candidate.fullName}
+              {displayName(candidate.fullName)}
             </h1>
             {candidate.position && (
               <p className="text-sm text-ink-soft">{candidate.position}</p>
             )}
           </div>
           <div className="flex items-center gap-2">
+            {canGenerateDocument && (
+              <GenerateDocumentButton candidateId={candidate.id} />
+            )}
             <CandidateActions
               candidateId={candidate.id}
               defaultValues={defaultValues}
               units={units}
               positions={positions}
+              showEnlistmentFields={isEnlisted}
             />
           </div>
         </div>

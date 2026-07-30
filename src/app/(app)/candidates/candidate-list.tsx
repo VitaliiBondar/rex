@@ -3,7 +3,7 @@ import { StatusSelect } from "@/components/status-select";
 import { StatusBadge } from "@/components/status-badge";
 import { StageTrack } from "@/components/stage-track";
 import { recruitmentTypeLabel, channelLabel } from "@/lib/domain";
-import { formatDate } from "@/lib/format";
+import { formatDate, displayName } from "@/lib/format";
 
 export type CandidateRow = {
   id: string;
@@ -119,7 +119,7 @@ export function CandidateList({
                       href={`/candidates/${c.id}`}
                       className="font-medium text-ink hover:underline"
                     >
-                      {c.fullName}
+                      {displayName(c.fullName)}
                     </Link>
                     {c.position && (
                       <p className="text-xs text-ink-faint">{c.position}</p>
@@ -171,7 +171,7 @@ export function CandidateList({
                   href={`/candidates/${c.id}`}
                   className="font-medium text-ink hover:underline"
                 >
-                  {c.fullName}
+                  {displayName(c.fullName)}
                 </Link>
                 {c.position && (
                   <p className="text-xs text-ink-faint">{c.position}</p>

@@ -11,6 +11,8 @@ import {
   RECRUITMENT_TYPE_LABELS,
   CHANNELS,
   CHANNEL_LABELS,
+  TCK_TYPES,
+  TCK_TYPE_LABELS,
 } from "@/lib/domain";
 import { Input, Textarea, Select } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
@@ -26,6 +28,9 @@ export type CandidateFormValues = {
   recruitmentType: string;
   channel: string;
   note: string;
+  orderNumber: string;
+  tckRegion: string;
+  tckType: string;
 };
 
 export function CandidateForm({
@@ -33,12 +38,16 @@ export function CandidateForm({
   defaultValues,
   units,
   positions,
+  showEnlistmentFields = false,
   onDone,
 }: {
   candidateId?: string;
   defaultValues?: Partial<CandidateFormValues>;
   units: { id: string; name: string }[];
   positions: string[];
+  // Показувати поля ТЦК/номера наказу — лише для вже зарахованих кандидатів,
+  // як резервний шлях (основний — модалка при зміні статусу на ENLISTED).
+  showEnlistmentFields?: boolean;
   onDone: () => void;
 }) {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -57,6 +66,9 @@ export function CandidateForm({
       recruitmentType: "CONTRACT",
       channel: "DIRECT",
       note: "",
+      orderNumber: "",
+      tckRegion: "",
+      tckType: "",
       ...defaultValues,
     } as unknown as CandidateInput,
   });
@@ -75,8 +87,8 @@ export function CandidateForm({
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <Field label="Ім'я та прізвище" htmlFor="fullName" error={errors.fullName?.message}>
-        <Input id="fullName" {...register("fullName")} placeholder="Іван Петренко" />
+      <Field label="Прізвище, ім'я, по батькові" htmlFor="fullName" error={errors.fullName?.message}>
+        <Input id="fullName" {...register("fullName")} placeholder="Петренко Іван Іванович" />
       </Field>
 
       <div className="grid grid-cols-2 gap-4">
@@ -136,6 +148,27 @@ export function CandidateForm({
           </datalist>
         </Field>
       </div>
+
+      {showEnlistmentFields && (
+        <div className="grid grid-cols-3 gap-4">
+          <Field label="Регіон ТЦК" htmlFor="tckRegion">
+            <Input id="tckRegion" {...register("tckRegion")} placeholder="Рівненський" />
+          </Field>
+          <Field label="Тип ТЦК" htmlFor="tckType">
+            <Select id="tckType" {...register("tckType")}>
+              <option value="">—</option>
+              {TCK_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {TCK_TYPE_LABELS[t]}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Номер наказу" htmlFor="orderNumber">
+            <Input id="orderNumber" {...register("orderNumber")} placeholder="123" />
+          </Field>
+        </div>
+      )}
 
       <Field label="Примітка" htmlFor="note" error={errors.note?.message}>
         <Textarea id="note" {...register("note")} placeholder="Специфічна інформація по кандидату…" />

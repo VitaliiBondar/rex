@@ -8,7 +8,7 @@ import { requiresUnitAssignment } from "@/lib/domain";
 
 export type ActionResult =
   | { ok: true; id?: string }
-  | { ok: false; error: string; code?: "NEEDS_UNIT" };
+  | { ok: false; error: string; code?: "NEEDS_UNIT" | "NEEDS_ENLISTMENT_INFO" };
 
 function revalidateAll() {
   revalidatePath("/candidates");
@@ -34,6 +34,9 @@ export async function createCandidate(input: unknown): Promise<ActionResult> {
       recruitmentType: data.recruitmentType,
       channel: data.channel,
       note: data.note ?? "",
+      orderNumber: data.orderNumber,
+      tckRegion: data.tckRegion,
+      tckType: data.tckType,
       status: "UNIT_SEARCH",
       statusChanges: {
         create: { fromStatus: null, toStatus: "UNIT_SEARCH", changedById: user.id },
@@ -67,6 +70,9 @@ export async function updateCandidate(
       recruitmentType: data.recruitmentType,
       channel: data.channel,
       note: data.note ?? "",
+      orderNumber: data.orderNumber ?? null,
+      tckRegion: data.tckRegion ?? null,
+      tckType: data.tckType ?? null,
     },
   });
 
@@ -84,11 +90,18 @@ export async function changeCandidateStatus(
   if (!parsed.success) {
     return { ok: false, error: "Некоректний статус" };
   }
-  const { candidateId, status, unitId } = parsed.data;
+  const { candidateId, status, unitId, orderNumber, tckRegion, tckType } =
+    parsed.data;
 
   const candidate = await prisma.candidate.findUnique({
     where: { id: candidateId },
-    select: { status: true, unitId: true },
+    select: {
+      status: true,
+      unitId: true,
+      orderNumber: true,
+      tckRegion: true,
+      tckType: true,
+    },
   });
   if (!candidate) return { ok: false, error: "Кандидата не знайдено" };
   if (candidate.status === status) return { ok: true, id: candidateId };
@@ -105,11 +118,26 @@ export async function changeCandidateStatus(
     };
   }
 
+  const missingEnlistmentInfo =
+    !(orderNumber ?? candidate.orderNumber) ||
+    !(tckRegion ?? candidate.tckRegion) ||
+    !(tckType ?? candidate.tckType);
+  if (status === "ENLISTED" && missingEnlistmentInfo) {
+    return {
+      ok: false,
+      error: "Вкажіть ТЦК і номер наказу",
+      code: "NEEDS_ENLISTMENT_INFO",
+    };
+  }
+
   await prisma.candidate.update({
     where: { id: candidateId },
     data: {
       status,
       ...(unitId ? { unitId } : {}),
+      ...(orderNumber ? { orderNumber } : {}),
+      ...(tckRegion ? { tckRegion } : {}),
+      ...(tckType ? { tckType } : {}),
       statusChanges: {
         create: {
           fromStatus: candidate.status,

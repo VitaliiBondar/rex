@@ -47,6 +47,11 @@ model Candidate {
   unitId String?
   unit   Unit?   @relation(fields: [unitId], references: [id], onDelete: SetNull)
 
+  // Дані для генерації "Повідомлення про зарахування" — заповнюються при переході в ENLISTED.
+  orderNumber String? // номер наказу по стройовій частині
+  tckRegion   String? // прикметник регіону ТЦК, напр. "Рівненський" (називний відмінок)
+  tckType     String? // OMTCK | RTCK | MTCK
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

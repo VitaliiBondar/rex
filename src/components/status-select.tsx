@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { STATUSES, STATUS_LABELS } from "@/lib/domain";
+import { STATUSES, STATUS_LABELS, type TckType } from "@/lib/domain";
 import { changeCandidateStatus } from "@/lib/actions/candidates";
 import { RequireUnitModal } from "@/components/require-unit-modal";
+import { RequireEnlistmentInfoModal } from "@/components/require-enlistment-info-modal";
 import { cn } from "@/lib/utils";
 
 // Швидка зміна статусу з фіксацією в історії.
@@ -20,16 +21,27 @@ export function StatusSelect({
 }) {
   const [pending, startTransition] = useTransition();
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [pendingEnlistment, setPendingEnlistment] = useState<string | null>(
+    null,
+  );
 
-  const apply = (next: string, unitId?: string) => {
+  const apply = (
+    next: string,
+    unitId?: string,
+    enlistmentInfo?: { tckRegion: string; tckType: TckType; orderNumber: string },
+  ) => {
     startTransition(async () => {
       const result = await changeCandidateStatus({
         candidateId,
         status: next,
         unitId,
+        ...enlistmentInfo,
       });
       if (!result.ok && result.code === "NEEDS_UNIT") {
         setPendingStatus(next);
+      }
+      if (!result.ok && result.code === "NEEDS_ENLISTMENT_INFO") {
+        setPendingEnlistment(next);
       }
     });
   };
@@ -67,6 +79,15 @@ export function StatusSelect({
         onConfirm={(unitId) => {
           if (pendingStatus) apply(pendingStatus, unitId);
           setPendingStatus(null);
+        }}
+      />
+      <RequireEnlistmentInfoModal
+        open={pendingEnlistment !== null}
+        pending={pending}
+        onClose={() => setPendingEnlistment(null)}
+        onConfirm={(info) => {
+          if (pendingEnlistment) apply(pendingEnlistment, undefined, info);
+          setPendingEnlistment(null);
         }}
       />
     </>

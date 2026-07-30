@@ -13,11 +13,13 @@ export function CandidateActions({
   defaultValues,
   units,
   positions,
+  showEnlistmentFields = false,
 }: {
   candidateId: string;
   defaultValues: Partial<CandidateFormValues>;
   units: { id: string; name: string }[];
   positions: string[];
+  showEnlistmentFields?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -56,6 +58,7 @@ export function CandidateActions({
           defaultValues={defaultValues}
           units={units}
           positions={positions}
+          showEnlistmentFields={showEnlistmentFields}
           onDone={() => setOpen(false)}
         />
       </Modal>

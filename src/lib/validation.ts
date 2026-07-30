@@ -5,6 +5,7 @@ import {
   STATUSES,
   GENDERS,
   ROLES,
+  TCK_TYPES,
 } from "./domain";
 
 // ── Авторизація ─────────────────────────────────────────────────────────────
@@ -33,6 +34,12 @@ export const candidateSchema = z.object({
   recruitmentType: z.enum(RECRUITMENT_TYPES),
   channel: z.enum(CHANNELS),
   note: z.preprocess(emptyToUndefined, z.string().max(5000).optional()),
+  // Дані для "Повідомлення про зарахування" — опційні, редагуються тут лише
+  // як резервний шлях (напр. для історичних кандидатів); основний спосіб —
+  // модалка при зміні статусу на ENLISTED.
+  orderNumber: z.preprocess(emptyToUndefined, z.string().trim().max(50).optional()),
+  tckRegion: z.preprocess(emptyToUndefined, z.string().trim().max(50).optional()),
+  tckType: z.preprocess(emptyToUndefined, z.enum(TCK_TYPES).optional()),
 });
 export type CandidateInput = z.infer<typeof candidateSchema>;
 
@@ -40,6 +47,9 @@ export const statusChangeSchema = z.object({
   candidateId: z.string().min(1),
   status: z.enum(STATUSES),
   unitId: z.string().min(1).optional(),
+  orderNumber: z.string().trim().min(1).optional(),
+  tckRegion: z.string().trim().min(1).optional(),
+  tckType: z.enum(TCK_TYPES).optional(),
 });
 
 // ── Користувач (керує адмін) ────────────────────────────────────────────────
