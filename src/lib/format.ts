@@ -33,6 +33,17 @@ export function previousMonth(month: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
+// Інклюзивний список місяців від start до end (для діапазону "весь період").
+export function monthsBetween(start: string, end: string): string[] {
+  const result: string[] = [start];
+  let cur = start;
+  while (cur !== end) {
+    cur = nextMonth(cur);
+    result.push(cur);
+  }
+  return result;
+}
+
 // "Прізвище Ім'я [По батькові]" → перші два слова для показу в UI
 // (по батькові зберігається в fullName, але ніде не відображається).
 export function displayName(fullName: string): string {
