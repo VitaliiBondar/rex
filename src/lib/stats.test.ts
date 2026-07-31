@@ -7,6 +7,7 @@ import {
   activeAtEndOfMonth,
   activeNow,
   reachedStatusEver,
+  earliestMonth,
   countBy,
   monthlyTrend,
   filterCandidates,
@@ -191,6 +192,30 @@ describe("reachedStatusEver", () => {
 
   it("кандидат, що ніколи не досягав статусу — відсутній", () => {
     expect(reachedStatusEver([stillActive], "ENLISTED")).toEqual([]);
+  });
+});
+
+describe("earliestMonth", () => {
+  it("повертає місяць найранішого createdAt", () => {
+    const candidates = [
+      makeCandidate("a", {
+        createdAt: new Date(2026, 5, 15),
+        changes: [{ toStatus: "UNIT_SEARCH", changedAt: new Date(2026, 5, 15) }],
+      }),
+      makeCandidate("b", {
+        createdAt: new Date(2026, 2, 1),
+        changes: [{ toStatus: "UNIT_SEARCH", changedAt: new Date(2026, 2, 1) }],
+      }),
+      makeCandidate("c", {
+        createdAt: new Date(2026, 6, 1),
+        changes: [{ toStatus: "UNIT_SEARCH", changedAt: new Date(2026, 6, 1) }],
+      }),
+    ];
+    expect(earliestMonth(candidates)).toBe("2026-03");
+  });
+
+  it("порожній список — повертає поточний місяць за now", () => {
+    expect(earliestMonth([], new Date(2026, 6, 20))).toBe("2026-07");
   });
 });
 

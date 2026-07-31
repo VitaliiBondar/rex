@@ -101,6 +101,18 @@ export function reachedStatusEver(
   );
 }
 
+// ── Місяць найранішого додавання (для діапазону "весь період") ──────────────
+export function earliestMonth(candidates: StatCandidate[], now: Date = new Date()): string {
+  const asMonth = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  if (candidates.length === 0) return asMonth(now);
+  const min = candidates.reduce(
+    (m, c) => (c.createdAt < m ? c.createdAt : m),
+    candidates[0].createdAt,
+  );
+  return asMonth(min);
+}
+
 // ── Групування ──────────────────────────────────────────────────────────────
 export function countBy(
   candidates: StatCandidate[],
