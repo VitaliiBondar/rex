@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { getCandidatesForStats } from "@/lib/queries";
 import {
   filterCandidates,
-  addedInMonth,
+  candidatesForMonth,
   reachedStatusInMonth,
   activeAtEndOfMonth,
   activeNow,
@@ -41,7 +41,11 @@ export default async function DashboardPage({
   const isAll = month === "all";
   const monthOptions = lastMonths(6); // фіксований список для селектора контролів
 
-  const added = isAll ? filtered : addedInMonth(filtered, month);
+  // Кандидати, що були "в роботі" протягом вибраного періоду — і ті, хто
+  // лишався активним на кінець періоду, і ті, хто фіналізувався саме в ньому
+  // (той самий знімок, що й на помісячному списку кандидатів). За весь час
+  // це просто всі відфільтровані кандидати.
+  const inProgressDuringPeriod = isAll ? filtered : candidatesForMonth(filtered, month);
   const enlistedCandidates = isAll
     ? reachedStatusEver(filtered, "ENLISTED")
     : reachedStatusInMonth(filtered, "ENLISTED", month);
@@ -115,7 +119,7 @@ export default async function DashboardPage({
 
         {/* KPI */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          <Kpi label={isAll ? "Додано всього" : "Нових за місяць"} value={added.length} />
+          <Kpi label="В роботі за період" value={inProgressDuringPeriod.length} />
           <Kpi label="Зараз в роботі" value={active.length} accent="ink" />
           <Kpi label="Зараховано" value={enlisted} accent="green" />
           <Kpi label="Відмова з нашого боку" value={rejected} accent="red" />
