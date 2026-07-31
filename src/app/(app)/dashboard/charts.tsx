@@ -17,7 +17,7 @@ import {
 export type NamedDatum = { name: string; value: number; fill: string };
 export type TrendDatum = {
   month: string;
-  Додані: number;
+  "В роботі": number;
   Зараховано: number;
   Відмови: number;
 };
@@ -70,7 +70,7 @@ export function TrendChart({ data }: { data: TrendDatum[] }) {
         <YAxis allowDecimals={false} tick={axisStyle} stroke="var(--border-strong)" width={28} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--surface-2)" }} />
         <Legend wrapperStyle={{ fontSize: 12, color: "var(--ink-soft)" }} />
-        <Bar dataKey="Додані" fill="#64748b" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="В роботі" fill="#64748b" radius={[3, 3, 0, 0]} />
         <Bar dataKey="Зараховано" fill="#22c55e" radius={[3, 3, 0, 0]} />
         <Bar dataKey="Відмови" fill="#ef4444" radius={[3, 3, 0, 0]} />
       </BarChart>

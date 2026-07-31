@@ -84,7 +84,7 @@ export default async function DashboardPage({
       "LLL",
       { locale: uk },
     ),
-    Додані: p.added,
+    "В роботі": p.inProgress,
     Зараховано: p.enlisted,
     Відмови: p.rejected + p.selfWithdrew,
   }));

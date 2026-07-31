@@ -295,11 +295,11 @@ describe("monthlyTrend", () => {
     }),
   ];
 
-  it("будує ряд по місяцях: додані/зараховані/відмовлені", () => {
+  it("будує ряд по місяцях: у роботі/зараховані/відмовлені", () => {
     const trend = monthlyTrend(candidates, ["2026-06", "2026-07"]);
     expect(trend).toEqual([
-      { month: "2026-06", added: 1, enlisted: 0, rejected: 0, selfWithdrew: 0 },
-      { month: "2026-07", added: 1, enlisted: 1, rejected: 1, selfWithdrew: 0 },
+      { month: "2026-06", inProgress: 1, enlisted: 0, rejected: 0, selfWithdrew: 0 },
+      { month: "2026-07", inProgress: 2, enlisted: 1, rejected: 1, selfWithdrew: 0 },
     ]);
   });
 });

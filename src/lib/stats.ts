@@ -154,7 +154,7 @@ export function filterCandidates<C extends StatCandidate & { fullName?: string }
 // ── Тренд по місяцях ────────────────────────────────────────────────────────
 export type MonthlyTrendPoint = {
   month: string;
-  added: number;
+  inProgress: number;
   enlisted: number;
   rejected: number;
   selfWithdrew: number;
@@ -166,7 +166,7 @@ export function monthlyTrend(
 ): MonthlyTrendPoint[] {
   return months.map((month) => ({
     month,
-    added: addedInMonth(candidates, month).length,
+    inProgress: candidatesForMonth(candidates, month).length,
     enlisted: reachedStatusInMonth(candidates, "ENLISTED", month).length,
     rejected: reachedStatusInMonth(candidates, "REJECTED_BY_US", month).length,
     selfWithdrew: reachedStatusInMonth(candidates, "SELF_WITHDREW", month)
