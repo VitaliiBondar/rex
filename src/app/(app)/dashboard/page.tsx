@@ -101,13 +101,14 @@ export default async function DashboardPage({
 
       <div className="p-4 sm:p-6 flex flex-col gap-6">
         {/* Усього зараховано — завжди видимо, незалежно від місяця/фільтрів */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Kpi label="Усього зараховано" value={allTimeEnlisted.length} accent="green" />
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <Kpi label="Усього зараховано" value={allTimeEnlisted.length} accent="green" dense />
           {RECRUITMENT_TYPES.map((t) => (
             <Kpi
               key={t}
               label={RECRUITMENT_TYPE_LABELS[t]}
               value={allTimeEnlistedByType[t] ?? 0}
+              dense
             />
           ))}
         </div>
@@ -150,15 +151,19 @@ function Kpi({
   label,
   value,
   accent = "ink",
+  dense = false,
 }: {
   label: string;
   value: number;
   accent?: string;
+  dense?: boolean;
 }) {
   return (
-    <Card className="p-4">
+    <Card className={dense ? "p-3" : "p-4"}>
       <p className="eyebrow leading-tight">{label}</p>
-      <p className={`tnum mt-2 text-3xl font-semibold ${ACCENTS[accent]}`}>
+      <p
+        className={`tnum mt-2 font-semibold ${dense ? "text-xl" : "text-3xl"} ${ACCENTS[accent]}`}
+      >
         {value}
       </p>
     </Card>
