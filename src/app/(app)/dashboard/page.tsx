@@ -15,24 +15,13 @@ import {
   monthlyTrend,
 } from "@/lib/stats";
 import {
-  ACTIVE_STATUSES,
-  STATUS_LABELS,
-  STATUS_COLORS,
   RECRUITMENT_TYPES,
   RECRUITMENT_TYPE_LABELS,
   RECRUITMENT_TYPE_COLORS,
-  CHANNELS,
-  CHANNEL_LABELS,
-  CHANNEL_COLORS,
 } from "@/lib/domain";
 import { currentMonth, lastMonths, monthLabel, monthsBetween } from "@/lib/format";
 import { DashboardControls } from "./dashboard-controls";
-import {
-  StageBarChart,
-  DistributionPie,
-  TrendChart,
-  type NamedDatum,
-} from "./charts";
+import { DistributionPie, TrendChart, type NamedDatum } from "./charts";
 
 export default async function DashboardPage({
   searchParams,
@@ -53,9 +42,10 @@ export default async function DashboardPage({
   const monthOptions = lastMonths(6); // фіксований список для селектора контролів
 
   const added = isAll ? filtered : addedInMonth(filtered, month);
-  const enlisted = isAll
-    ? reachedStatusEver(filtered, "ENLISTED").length
-    : reachedStatusInMonth(filtered, "ENLISTED", month).length;
+  const enlistedCandidates = isAll
+    ? reachedStatusEver(filtered, "ENLISTED")
+    : reachedStatusInMonth(filtered, "ENLISTED", month);
+  const enlisted = enlistedCandidates.length;
   const rejected = isAll
     ? reachedStatusEver(filtered, "REJECTED_BY_US").length
     : reachedStatusInMonth(filtered, "REJECTED_BY_US", month).length;
@@ -64,34 +54,20 @@ export default async function DashboardPage({
     : reachedStatusInMonth(filtered, "SELF_WITHDREW", month).length;
   const active = isAll ? activeNow(filtered) : activeAtEndOfMonth(filtered, month);
 
-  // Розподіл активних по етапах.
-  const activeByStatus = countBy(active, (c) => c.status);
-  const stageData: NamedDatum[] = ACTIVE_STATUSES.filter(
-    (s) => activeByStatus[s],
-  ).map((s) => ({
-    name: STATUS_LABELS[s],
-    value: activeByStatus[s],
-    fill: STATUS_COLORS[s],
-  }));
-
-  // Розподіл доданих (або всіх — у режимі "Весь період") по типах і каналах.
-  const addedByType = countBy(added, (c) => c.recruitmentType);
-  const typeData: NamedDatum[] = RECRUITMENT_TYPES.filter(
-    (t) => addedByType[t],
+  // Зараховані (у вибраному місяці, або за весь час) за типом залучення.
+  const enlistedByType = countBy(enlistedCandidates, (c) => c.recruitmentType);
+  const enlistedTypeData: NamedDatum[] = RECRUITMENT_TYPES.filter(
+    (t) => enlistedByType[t],
   ).map((t) => ({
     name: RECRUITMENT_TYPE_LABELS[t],
-    value: addedByType[t],
+    value: enlistedByType[t],
     fill: RECRUITMENT_TYPE_COLORS[t],
   }));
 
-  const addedByChannel = countBy(added, (c) => c.channel);
-  const channelData: NamedDatum[] = CHANNELS.filter(
-    (c) => addedByChannel[c],
-  ).map((c) => ({
-    name: CHANNEL_LABELS[c],
-    value: addedByChannel[c],
-    fill: CHANNEL_COLORS[c],
-  }));
+  // Усього зараховано за весь час (незалежно від місяця/фільтрів) — для
+  // завжди видимого верхнього блоку.
+  const allTimeEnlisted = reachedStatusEver(all, "ENLISTED");
+  const allTimeEnlistedByType = countBy(allTimeEnlisted, (c) => c.recruitmentType);
 
   // Тренд: 6 місяців, або повна історія в режимі "Весь період" (діапазон —
   // від нефільтрованого `all`, щоб вісь не змінювалась при зміні фільтрів).
@@ -124,14 +100,14 @@ export default async function DashboardPage({
       </div>
 
       <div className="p-4 sm:p-6 flex flex-col gap-6">
-        {/* Усього кандидатів — завжди видимо, незалежно від місяця/фільтрів */}
+        {/* Усього зараховано — завжди видимо, незалежно від місяця/фільтрів */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Kpi label="Усього кандидатів" value={all.length} accent="ink" />
+          <Kpi label="Усього зараховано" value={allTimeEnlisted.length} accent="green" />
           {RECRUITMENT_TYPES.map((t) => (
             <Kpi
               key={t}
               label={RECRUITMENT_TYPE_LABELS[t]}
-              value={countBy(all, (c) => c.recruitmentType)[t] ?? 0}
+              value={allTimeEnlistedByType[t] ?? 0}
             />
           ))}
         </div>
@@ -153,21 +129,11 @@ export default async function DashboardPage({
           <TrendChart data={trend} />
         </Card>
 
-        {/* Розподіли */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-5">
-            <p className="eyebrow mb-4">В роботі за етапами</p>
-            <StageBarChart data={stageData} />
-          </Card>
-          <Card className="p-5">
-            <p className="eyebrow mb-4">Додані за типом залучення</p>
-            <DistributionPie data={typeData} />
-          </Card>
-          <Card className="p-5 lg:col-span-2">
-            <p className="eyebrow mb-4">Додані за каналом</p>
-            <DistributionPie data={channelData} />
-          </Card>
-        </div>
+        {/* Зараховано за типом залучення */}
+        <Card className="p-5">
+          <p className="eyebrow mb-4">Зараховано</p>
+          <DistributionPie data={enlistedTypeData} />
+        </Card>
       </div>
     </>
   );

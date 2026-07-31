@@ -31,31 +31,6 @@ const tooltipStyle = {
   color: "var(--ink)",
 };
 
-export function StageBarChart({ data }: { data: NamedDatum[] }) {
-  if (data.length === 0) return <Empty />;
-  return (
-    <ResponsiveContainer width="100%" height={240}>
-      <BarChart data={data} layout="vertical" margin={{ left: 8, right: 16 }}>
-        <CartesianGrid horizontal={false} stroke="var(--border)" />
-        <XAxis type="number" allowDecimals={false} tick={axisStyle} stroke="var(--border-strong)" />
-        <YAxis
-          type="category"
-          dataKey="name"
-          width={110}
-          tick={axisStyle}
-          stroke="var(--border-strong)"
-        />
-        <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--surface-2)" }} />
-        <Bar dataKey="value" name="Кандидатів" radius={[0, 4, 4, 0]}>
-          {data.map((d, i) => (
-            <Cell key={i} fill={d.fill} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
-
 export function DistributionPie({ data }: { data: NamedDatum[] }) {
   if (data.length === 0) return <Empty />;
   return (
