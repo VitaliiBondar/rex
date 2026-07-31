@@ -148,7 +148,9 @@ export default async function DashboardPage({
 
         {/* Зараховано за типом залучення */}
         <Card className="p-5">
-          <p className="eyebrow mb-4">Зараховано</p>
+          <p className="eyebrow mb-4">
+            Зараховано за {isAll ? "весь час" : monthNameLabel(month)}
+          </p>
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="min-w-0 flex-1">
               <DistributionPie data={enlistedTypeData} />
