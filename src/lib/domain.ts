@@ -22,12 +22,14 @@ export const RECRUITMENT_TYPES = [
   "MOBILIZATION",
   "CONTRACT",
   "CONTRACT_18_24",
+  "NEW_CONTRACT",
 ] as const;
 export type RecruitmentType = (typeof RECRUITMENT_TYPES)[number];
 export const RECRUITMENT_TYPE_LABELS: Record<RecruitmentType, string> = {
   MOBILIZATION: "Мобілізація",
   CONTRACT: "Контракт",
   CONTRACT_18_24: "Контракт 18–24",
+  NEW_CONTRACT: "Новий контракт",
 };
 
 // ── Канал залучення ─────────────────────────────────────────────────────────
@@ -110,6 +112,7 @@ export const RECRUITMENT_TYPE_COLORS: Record<RecruitmentType, string> = {
   MOBILIZATION: "#0ea5e9",
   CONTRACT: "#8b5cf6",
   CONTRACT_18_24: "#22c55e",
+  NEW_CONTRACT: "#f97316",
 };
 
 export const CHANNEL_COLORS: Record<Channel, string> = {

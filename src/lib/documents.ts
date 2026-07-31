@@ -31,6 +31,7 @@ const RECRUITMENT_TYPE_DOCUMENT_TEXT: Record<string, string> = {
   MOBILIZATION: "за призовом під час мобілізації на особливий період",
   CONTRACT: "за контрактом",
   CONTRACT_18_24: "за контрактом",
+  NEW_CONTRACT: "за контрактом",
 };
 
 // Присвійний займенник ("...зарахування його/її до списків...") за статтю.
