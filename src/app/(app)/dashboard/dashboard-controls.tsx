@@ -43,6 +43,7 @@ export function DashboardControls({
             {monthLabel(m)}
           </option>
         ))}
+        <option value="all">Весь період</option>
       </select>
 
       <select

@@ -8,6 +8,9 @@ import {
   addedInMonth,
   reachedStatusInMonth,
   activeAtEndOfMonth,
+  activeNow,
+  reachedStatusEver,
+  earliestMonth,
   countBy,
   monthlyTrend,
 } from "@/lib/stats";
@@ -22,7 +25,7 @@ import {
   CHANNEL_LABELS,
   CHANNEL_COLORS,
 } from "@/lib/domain";
-import { currentMonth, lastMonths, monthLabel } from "@/lib/format";
+import { currentMonth, lastMonths, monthLabel, monthsBetween } from "@/lib/format";
 import { DashboardControls } from "./dashboard-controls";
 import {
   StageBarChart,
@@ -46,11 +49,20 @@ export default async function DashboardPage({
     channel: sp.channel,
   });
 
-  const added = addedInMonth(filtered, month);
-  const enlisted = reachedStatusInMonth(filtered, "ENLISTED", month).length;
-  const rejected = reachedStatusInMonth(filtered, "REJECTED_BY_US", month).length;
-  const selfWithdrew = reachedStatusInMonth(filtered, "SELF_WITHDREW", month).length;
-  const active = activeAtEndOfMonth(filtered, month);
+  const isAll = month === "all";
+  const monthOptions = lastMonths(6); // фіксований список для селектора контролів
+
+  const added = isAll ? filtered : addedInMonth(filtered, month);
+  const enlisted = isAll
+    ? reachedStatusEver(filtered, "ENLISTED").length
+    : reachedStatusInMonth(filtered, "ENLISTED", month).length;
+  const rejected = isAll
+    ? reachedStatusEver(filtered, "REJECTED_BY_US").length
+    : reachedStatusInMonth(filtered, "REJECTED_BY_US", month).length;
+  const selfWithdrew = isAll
+    ? reachedStatusEver(filtered, "SELF_WITHDREW").length
+    : reachedStatusInMonth(filtered, "SELF_WITHDREW", month).length;
+  const active = isAll ? activeNow(filtered) : activeAtEndOfMonth(filtered, month);
 
   // Розподіл активних по етапах.
   const activeByStatus = countBy(active, (c) => c.status);
@@ -62,7 +74,7 @@ export default async function DashboardPage({
     fill: STATUS_COLORS[s],
   }));
 
-  // Розподіл доданих за місяць по типах і каналах.
+  // Розподіл доданих (або всіх — у режимі "Весь період") по типах і каналах.
   const addedByType = countBy(added, (c) => c.recruitmentType);
   const typeData: NamedDatum[] = RECRUITMENT_TYPES.filter(
     (t) => addedByType[t],
@@ -81,8 +93,11 @@ export default async function DashboardPage({
     fill: CHANNEL_COLORS[c],
   }));
 
-  // Тренд за 6 місяців.
-  const trendMonths = lastMonths(6);
+  // Тренд: 6 місяців, або повна історія в режимі "Весь період" (діапазон —
+  // від нефільтрованого `all`, щоб вісь не змінювалась при зміні фільтрів).
+  const trendMonths = isAll
+    ? monthsBetween(earliestMonth(all), currentMonth())
+    : lastMonths(6);
   const trend = monthlyTrend(filtered, trendMonths).map((p) => ({
     month: format(
       new Date(Number(p.month.split("-")[0]), Number(p.month.split("-")[1]) - 1),
@@ -99,16 +114,31 @@ export default async function DashboardPage({
       <PageHeader title="Дашборд" />
 
       <div className="px-4 sm:px-6 py-4 border-b border-border bg-surface">
-        <DashboardControls months={trendMonths} currentMonth={month} />
+        <DashboardControls months={monthOptions} currentMonth={month} />
         <p className="mt-2 text-sm text-ink-soft">
-          Показники за <span className="font-medium text-ink">{monthLabel(month)}</span>
+          Показники за{" "}
+          <span className="font-medium text-ink">
+            {isAll ? "весь час" : monthLabel(month)}
+          </span>
         </p>
       </div>
 
       <div className="p-4 sm:p-6 flex flex-col gap-6">
+        {/* Усього кандидатів — завжди видимо, незалежно від місяця/фільтрів */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <Kpi label="Усього кандидатів" value={all.length} accent="ink" />
+          {RECRUITMENT_TYPES.map((t) => (
+            <Kpi
+              key={t}
+              label={RECRUITMENT_TYPE_LABELS[t]}
+              value={countBy(all, (c) => c.recruitmentType)[t] ?? 0}
+            />
+          ))}
+        </div>
+
         {/* KPI */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          <Kpi label="Нових за місяць" value={added.length} />
+          <Kpi label={isAll ? "Додано всього" : "Нових за місяць"} value={added.length} />
           <Kpi label="Зараз в роботі" value={active.length} accent="ink" />
           <Kpi label="Зараховано" value={enlisted} accent="green" />
           <Kpi label="Відмова з нашого боку" value={rejected} accent="red" />
@@ -117,7 +147,9 @@ export default async function DashboardPage({
 
         {/* Тренд */}
         <Card className="p-5">
-          <p className="eyebrow mb-4">Динаміка за 6 місяців</p>
+          <p className="eyebrow mb-4">
+            {isAll ? "Динаміка за весь час" : "Динаміка за 6 місяців"}
+          </p>
           <TrendChart data={trend} />
         </Card>
 
