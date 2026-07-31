@@ -85,6 +85,22 @@ export function activeAtEndOfMonth(
   });
 }
 
+// ── Активні зараз (живий статус, без реконструкції на дату) ─────────────────
+export function activeNow(candidates: StatCandidate[]): StatCandidate[] {
+  const finals: readonly string[] = FINAL_STATUSES;
+  return candidates.filter((c) => !finals.includes(c.status));
+}
+
+// ── Колись досягли статусу (без обмеження місяцем) ──────────────────────────
+export function reachedStatusEver(
+  candidates: StatCandidate[],
+  status: string,
+): StatCandidate[] {
+  return candidates.filter((c) =>
+    c.statusChanges.some((ch) => ch.toStatus === status),
+  );
+}
+
 // ── Групування ──────────────────────────────────────────────────────────────
 export function countBy(
   candidates: StatCandidate[],

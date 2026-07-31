@@ -5,6 +5,8 @@ import {
   addedInMonth,
   reachedStatusInMonth,
   activeAtEndOfMonth,
+  activeNow,
+  reachedStatusEver,
   countBy,
   monthlyTrend,
   filterCandidates,
@@ -142,6 +144,53 @@ describe("activeAtEndOfMonth (перехід між місяцями)", () => {
   it("не активний до свого створення (у травні)", () => {
     const active = activeAtEndOfMonth([carryOver], "2026-05");
     expect(active.length).toBe(0);
+  });
+});
+
+describe("activeNow", () => {
+  const active = makeCandidate("active", {
+    createdAt: new Date(2026, 5, 1),
+    changes: [{ toStatus: "MEDICAL_COMMISSION", changedAt: new Date(2026, 5, 1) }],
+  });
+  const enlisted = makeCandidate("enlisted", {
+    createdAt: new Date(2026, 5, 1),
+    changes: [{ toStatus: "ENLISTED", changedAt: new Date(2026, 5, 1) }],
+  });
+  const rejected = makeCandidate("rejected", {
+    createdAt: new Date(2026, 5, 1),
+    changes: [{ toStatus: "REJECTED_BY_US", changedAt: new Date(2026, 5, 1) }],
+  });
+
+  it("повертає лише кандидатів із живим нефінальним статусом", () => {
+    const result = activeNow([active, enlisted, rejected]);
+    expect(result.map((c) => c.id)).toEqual(["active"]);
+  });
+
+  it("порожній список на вході — порожній на виході", () => {
+    expect(activeNow([])).toEqual([]);
+  });
+});
+
+describe("reachedStatusEver", () => {
+  const enlistedLongAgo = makeCandidate("a", {
+    createdAt: new Date(2026, 0, 1),
+    changes: [
+      { toStatus: "UNIT_SEARCH", changedAt: new Date(2026, 0, 1) },
+      { toStatus: "ENLISTED", changedAt: new Date(2026, 1, 1) },
+    ],
+  });
+  const stillActive = makeCandidate("b", {
+    createdAt: new Date(2026, 5, 1),
+    changes: [{ toStatus: "UNIT_SEARCH", changedAt: new Date(2026, 5, 1) }],
+  });
+
+  it("рахує незалежно від того, як давно відбувся перехід", () => {
+    const result = reachedStatusEver([enlistedLongAgo, stillActive], "ENLISTED");
+    expect(result.map((c) => c.id)).toEqual(["a"]);
+  });
+
+  it("кандидат, що ніколи не досягав статусу — відсутній", () => {
+    expect(reachedStatusEver([stillActive], "ENLISTED")).toEqual([]);
   });
 });
 
