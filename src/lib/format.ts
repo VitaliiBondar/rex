@@ -15,6 +15,12 @@ export function monthLabel(month: string): string {
   return format(new Date(y, m - 1, 1), "LLLL yyyy", { locale: uk });
 }
 
+// "2026-07" → "липень" (без року, для контекстів де рік і так очевидний)
+export function monthNameLabel(month: string): string {
+  const [y, m] = month.split("-").map(Number);
+  return format(new Date(y, m - 1, 1), "LLLL", { locale: uk });
+}
+
 // Поточний місяць у форматі "YYYY-MM".
 export function currentMonth(now: Date = new Date()): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;

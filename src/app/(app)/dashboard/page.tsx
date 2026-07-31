@@ -11,6 +11,7 @@ import {
   activeNow,
   reachedStatusEver,
   earliestMonth,
+  enlistedDate,
   countBy,
   monthlyTrend,
 } from "@/lib/stats";
@@ -19,7 +20,12 @@ import {
   RECRUITMENT_TYPE_LABELS,
   RECRUITMENT_TYPE_COLORS,
 } from "@/lib/domain";
-import { currentMonth, lastMonths, monthLabel, monthsBetween } from "@/lib/format";
+import {
+  currentMonth,
+  lastMonths,
+  monthNameLabel,
+  monthsBetween,
+} from "@/lib/format";
 import { DashboardControls } from "./dashboard-controls";
 import { DistributionPie, TrendChart, type NamedDatum } from "./charts";
 
@@ -68,10 +74,14 @@ export default async function DashboardPage({
     fill: RECRUITMENT_TYPE_COLORS[t],
   }));
 
-  // Усього зараховано за весь час (незалежно від місяця/фільтрів) — для
-  // завжди видимого верхнього блоку.
-  const allTimeEnlisted = reachedStatusEver(all, "ENLISTED");
-  const allTimeEnlistedByType = countBy(allTimeEnlisted, (c) => c.recruitmentType);
+  // Усього зараховано за поточний календарний рік (незалежно від вибраного
+  // місяця/фільтрів) — для завжди видимого верхнього блоку.
+  const currentYear = new Date().getFullYear();
+  const yearlyEnlisted = reachedStatusEver(all, "ENLISTED").filter((c) => {
+    const d = enlistedDate(c);
+    return d !== null && d.getFullYear() === currentYear;
+  });
+  const yearlyEnlistedByType = countBy(yearlyEnlisted, (c) => c.recruitmentType);
 
   // Тренд: 6 місяців, або повна історія в режимі "Весь період" (діапазон —
   // від нефільтрованого `all`, щоб вісь не змінювалась при зміні фільтрів).
@@ -98,16 +108,16 @@ export default async function DashboardPage({
       </div>
 
       <div className="p-4 sm:p-6 flex flex-col gap-6">
-        {/* Усього зараховано — завжди видимо, незалежно від місяця/фільтрів */}
+        {/* Усього зараховано за поточний рік — завжди видимо, незалежно від місяця/фільтрів */}
         <div>
-          <p className="eyebrow mb-2">Зараховано за весь час</p>
+          <p className="eyebrow mb-2">Зараховано за {currentYear}</p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            <Kpi label="Усього зараховано" value={allTimeEnlisted.length} accent="green" dense />
+            <Kpi label="Усього зараховано" value={yearlyEnlisted.length} accent="green" dense />
             {RECRUITMENT_TYPES.map((t) => (
               <Kpi
                 key={t}
                 label={RECRUITMENT_TYPE_LABELS[t]}
-                value={allTimeEnlistedByType[t] ?? 0}
+                value={yearlyEnlistedByType[t] ?? 0}
                 dense
               />
             ))}
@@ -117,7 +127,7 @@ export default async function DashboardPage({
         {/* KPI */}
         <div>
           <p className="eyebrow mb-2">
-            Показники за {isAll ? "весь час" : monthLabel(month)}
+            Показники за {isAll ? "весь час" : monthNameLabel(month)}
           </p>
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             <Kpi label="В роботі за період" value={inProgressDuringPeriod.length} />
