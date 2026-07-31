@@ -95,35 +95,37 @@ export default async function DashboardPage({
 
       <div className="px-4 sm:px-6 py-4 border-b border-border bg-surface">
         <DashboardControls months={monthOptions} currentMonth={month} />
-        <p className="mt-2 text-sm text-ink-soft">
-          Показники за{" "}
-          <span className="font-medium text-ink">
-            {isAll ? "весь час" : monthLabel(month)}
-          </span>
-        </p>
       </div>
 
       <div className="p-4 sm:p-6 flex flex-col gap-6">
         {/* Усього зараховано — завжди видимо, незалежно від місяця/фільтрів */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          <Kpi label="Усього зараховано" value={allTimeEnlisted.length} accent="green" dense />
-          {RECRUITMENT_TYPES.map((t) => (
-            <Kpi
-              key={t}
-              label={RECRUITMENT_TYPE_LABELS[t]}
-              value={allTimeEnlistedByType[t] ?? 0}
-              dense
-            />
-          ))}
+        <div>
+          <p className="eyebrow mb-2">Зараховано за весь час</p>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <Kpi label="Усього зараховано" value={allTimeEnlisted.length} accent="green" dense />
+            {RECRUITMENT_TYPES.map((t) => (
+              <Kpi
+                key={t}
+                label={RECRUITMENT_TYPE_LABELS[t]}
+                value={allTimeEnlistedByType[t] ?? 0}
+                dense
+              />
+            ))}
+          </div>
         </div>
 
         {/* KPI */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          <Kpi label="В роботі за період" value={inProgressDuringPeriod.length} />
-          <Kpi label="Зараз в роботі" value={active.length} accent="ink" />
-          <Kpi label="Зараховано" value={enlisted} accent="green" />
-          <Kpi label="Відмова з нашого боку" value={rejected} accent="red" />
-          <Kpi label="Відмовився сам" value={selfWithdrew} accent="orange" />
+        <div>
+          <p className="eyebrow mb-2">
+            Показники за {isAll ? "весь час" : monthLabel(month)}
+          </p>
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <Kpi label="В роботі за період" value={inProgressDuringPeriod.length} />
+            <Kpi label="Зараз в роботі" value={active.length} accent="ink" />
+            <Kpi label="Зараховано" value={enlisted} accent="green" />
+            <Kpi label="Відмова з нашого боку" value={rejected} accent="red" />
+            <Kpi label="Відмовився сам" value={selfWithdrew} accent="orange" />
+          </div>
         </div>
 
         {/* Тренд */}
