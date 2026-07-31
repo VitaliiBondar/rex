@@ -149,7 +149,27 @@ export default async function DashboardPage({
         {/* Зараховано за типом залучення */}
         <Card className="p-5">
           <p className="eyebrow mb-4">Зараховано</p>
-          <DistributionPie data={enlistedTypeData} />
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="min-w-0 flex-1">
+              <DistributionPie data={enlistedTypeData} />
+            </div>
+            <ul className="flex w-full shrink-0 flex-col gap-2 sm:w-52">
+              {RECRUITMENT_TYPES.map((t) => (
+                <li key={t} className="flex items-center justify-between gap-2 text-sm">
+                  <span className="flex items-center gap-2 text-ink-soft">
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ background: RECRUITMENT_TYPE_COLORS[t] }}
+                    />
+                    {RECRUITMENT_TYPE_LABELS[t]}
+                  </span>
+                  <span className="tnum font-medium text-ink">
+                    {enlistedByType[t] ?? 0}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </Card>
       </div>
     </>
