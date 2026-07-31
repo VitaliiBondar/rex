@@ -124,6 +124,14 @@ export default async function DashboardPage({
           </div>
         </div>
 
+        {/* Тренд */}
+        <Card className="p-5">
+          <p className="eyebrow mb-4">
+            {isAll ? "Динаміка за весь час" : "Динаміка за 6 місяців"}
+          </p>
+          <TrendChart data={trend} />
+        </Card>
+
         {/* KPI */}
         <div>
           <p className="eyebrow mb-2">
@@ -137,14 +145,6 @@ export default async function DashboardPage({
             <Kpi label="Відмовився сам" value={selfWithdrew} accent="orange" />
           </div>
         </div>
-
-        {/* Тренд */}
-        <Card className="p-5">
-          <p className="eyebrow mb-4">
-            {isAll ? "Динаміка за весь час" : "Динаміка за 6 місяців"}
-          </p>
-          <TrendChart data={trend} />
-        </Card>
 
         {/* Зараховано за типом залучення */}
         <Card className="p-5">
