@@ -52,8 +52,10 @@ export function monthsBetween(start: string, end: string): string[] {
 
 // "Прізвище Ім'я [По батькові]" → перші два слова для показу в UI
 // (по батькові зберігається в fullName, але ніде не відображається).
+// Прізвище — капслоком (бюрократична конвенція), ім'я — як є.
 export function displayName(fullName: string): string {
-  return fullName.trim().split(/\s+/).slice(0, 2).join(" ");
+  const [surname, givenName] = fullName.trim().split(/\s+/);
+  return [surname?.toUpperCase(), givenName].filter(Boolean).join(" ");
 }
 
 // Останні N місяців (від старих до нових), включно з поточним.
