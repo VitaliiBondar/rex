@@ -48,7 +48,7 @@ function splitFullName(fullName: string): {
   return { familyName, givenName, patronymicName };
 }
 
-async function fullNameGenitive(
+export async function fullNameGenitive(
   fullName: string,
   gender: string | null,
 ): Promise<string> {
@@ -61,7 +61,11 @@ async function fullNameGenitive(
         : ((await detectGender(parts)) ?? GrammaticalGender.MASCULINE);
 
   const declined = await inGenitive({ gender: grammaticalGender, ...parts });
-  return [declined.familyName, declined.givenName, declined.patronymicName]
+  return [
+    declined.familyName?.toUpperCase(),
+    declined.givenName,
+    declined.patronymicName,
+  ]
     .filter(Boolean)
     .join(" ");
 }
